@@ -40,13 +40,6 @@
                 android:text="Thread"
                 android:textSize="17sp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="393 views"
-                android:textSize="13sp"
-                style="@style/Base.Widget.AppCompat.TextView.TextSec" />
-
         </LinearLayout>
 
     </LinearLayout>
