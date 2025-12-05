@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/bgColor">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/shapeableImageView"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/white"
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+        app:srcCompat="@drawable/ic_launcher_foreground"
+        app:strokeColor="@color/textMain"
+        app:strokeWidth="0.1dp"
+        app:tint="@color/textMain" />
+
+    <TextView
+        android:id="@+id/username"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="@string/sample_username"
+        app:layout_constraintStart_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintTop_toTopOf="@+id/shapeableImageView" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/verifiedImage"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="4dp"
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/username"
+        app:layout_constraintStart_toEndOf="@+id/username"
+        app:layout_constraintTop_toTopOf="@+id/username"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+        app:srcCompat="@drawable/verified_24px" />
+
+
+    <TextView
+        android:id="@+id/name"
+        style="@style/Base.Widget.AppCompat.TextView.TextSec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sample_name"
+        android:layout_marginVertical="2dp"
+        app:layout_constraintStart_toStartOf="@+id/username"
+        app:layout_constraintTop_toBottomOf="@+id/username" />
+
+    <TextView
+        android:id="@+id/followers"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10.7K followers"
+        android:textSize="14sp"
+        android:textStyle="normal"
+        android:layout_marginTop="2dp"
+        app:layout_constraintStart_toStartOf="@+id/name"
+        app:layout_constraintTop_toBottomOf="@+id/name" />
+
+
+    <TextView
+        android:id="@+id/followButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/button_background"
+        android:paddingHorizontal="22dp"
+        android:paddingVertical="8dp"
+        android:text="Follow"
+        android:textColor="@color/textMain"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/bgColor1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/followers"
+        app:layout_constraintTop_toBottomOf="@+id/followers" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

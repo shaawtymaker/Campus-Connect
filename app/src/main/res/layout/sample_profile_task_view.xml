@@ -1,0 +1,15 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.harsh.shah.threads.clone.views.ProfileTaskView
+        android:layout_width="180dp"
+        android:layout_height="210dp"
+        app:title="Create Thread"
+        app:description="Say what's on your mind or share a recent highlight."
+        app:buttonTitle="Create"
+        app:imageSrc="@drawable/linear_edit"/>
+
+
+</FrameLayout>

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgColor"
+    tools:context=".activities.SettingsActivity">
+
+    <LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="12dp"
+            android:src="@drawable/rounded_arrow_back_24"
+            android:onClick="pressBack"/>
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/border"
+        layout="@layout/layout_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <TextView
+        android:id="@+id/follow_and_invite_friends"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/person_add_24"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Follow and invite friends"
+        app:layout_constraintBottom_toTopOf="@+id/notifications"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+
+    <TextView
+        android:id="@+id/notifications"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/rounded_notifications_24"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Notifications"
+        app:layout_constraintBottom_toTopOf="@+id/liked"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/follow_and_invite_friends"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+
+    <TextView
+        android:id="@+id/liked"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/favorite_outline_24px"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Liked"
+        app:layout_constraintBottom_toTopOf="@+id/saved"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/notifications"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+
+    <TextView
+        android:id="@+id/saved"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/rounded_bookmark_24"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Saved"
+        app:layout_constraintBottom_toTopOf="@+id/privacy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/liked"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+
+    <TextView
+        android:id="@+id/privacy"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/lock_24px"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Privacy"
+        app:layout_constraintBottom_toTopOf="@+id/account"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saved"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground" />
+
+
+    <TextView
+        android:id="@+id/account"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Account"
+        app:drawableLeftCompat="@drawable/rounded_account_circle_24"
+        app:layout_constraintBottom_toTopOf="@+id/language"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/privacy"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+
+    <TextView
+        android:id="@+id/language"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Language"
+        app:drawableLeftCompat="@drawable/rounded_language_japanese_kana_24"
+        app:layout_constraintBottom_toTopOf="@+id/help"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/account"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+
+    <TextView
+        android:id="@+id/help"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/rounded_help_24"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="Help"
+        app:layout_constraintBottom_toTopOf="@+id/about"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/language"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/about"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:drawableLeftCompat="@drawable/rounded_info_24"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="12dp"
+        android:text="About"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/help"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"/>
+
+    <include
+        android:id="@+id/border1"
+        layout="@layout/layout_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/about" />
+
+
+    <TextView
+        android:id="@+id/switch_profile"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="12dp"
+        android:text="Switch profiles"
+        android:textColor="@color/blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/border1" />
+
+    <TextView
+        android:id="@+id/logout"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="12dp"
+        android:text="logout"
+        android:textColor="@color/red"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_profile" />
+
+
+    
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,67 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.google.gms.google.services)
+}
+
+android {
+    namespace 'com.harsh.shah.threads.clone'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.harsh.shah.threads.clone"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/*.kotlin_module', 'META-INF/INDEX.LIST']
+        }
+    }
+
+    viewBinding {
+        enabled true
+    }
+}
+
+dependencies {
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+    implementation libs.firebase.messaging
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.auth
+    implementation libs.firebase.database
+    implementation libs.firebase.play.service.auth
+    implementation libs.google.auth.library.oauth2.http
+    implementation libs.swipe.refresh.layout
+    implementation libs.switch.button
+    implementation libs.picasso
+    implementation libs.glide
+    implementation(libs.photoview.dialog)
+
+    implementation(libs.sdk.for.android)
+    implementation libs.ivcompressor
+    implementation libs.jave.all.deps
+
+}

@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="ProfileTaskView">
+        <attr name="imageSrc" format="reference" />
+        <attr name="title" format="string" />
+        <attr name="description" format="string" />
+        <attr name="buttonTitle" format="string" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/hover_bg1"
+    android:focusable="true"
+    android:clickable="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintVertical_weight="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="16dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/profile_image"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@color/textMain"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+        <TextView
+            android:id="@+id/username"
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textSize="14sp"
+            android:text="@string/sample_username"
+            app:layout_constraintStart_toEndOf="@+id/profile_image"
+            app:layout_constraintTop_toTopOf="@+id/profile_image" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/verifiedImage"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="4dp"
+            android:padding="2dp"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="@+id/username"
+            app:layout_constraintStart_toEndOf="@+id/username"
+            app:layout_constraintTop_toTopOf="@+id/username"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+            app:srcCompat="@drawable/verified_24px" />
+
+        <TextView
+            android:id="@+id/time_span"
+            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3w"
+            android:layout_marginStart="2dp"
+            app:layout_constraintStart_toEndOf="@id/verifiedImage"
+            app:layout_constraintTop_toTopOf="@id/verifiedImage"
+            app:layout_constraintBottom_toBottomOf="@id/verifiedImage"/>
+
+        <TextView
+            android:id="@+id/textView12"
+            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:text="Sent you a follow request"
+            app:layout_constraintStart_toStartOf="@id/username"
+            app:layout_constraintTop_toBottomOf="@id/username" />
+
+        <TextView
+            android:id="@+id/follow_button"
+            style="@style/Base.Widget.AppCompat.TextView.ButtonOutlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Follow"
+            app:layout_constraintBottom_toBottomOf="@+id/profile_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/profile_image" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/bgColor1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

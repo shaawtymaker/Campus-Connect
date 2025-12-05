@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/bgColor">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reply to Comment"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/textMain"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/parentCommentPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Replying to..."
+        android:textSize="14sp"
+        android:textColor="@color/textSec"
+        android:padding="8dp"
+        android:background="@drawable/search_fragment_tv_bg"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/replyInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Write your reply..."
+        android:minHeight="80dp"
+        android:gravity="top"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:textColor="@color/textMain"
+        android:textColorHint="@color/textSec"
+        android:background="@drawable/search_fragment_tv_bg"
+        android:inputType="textMultiLine"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textSize="14sp"
+            android:textColor="@color/textSec"
+            android:background="@drawable/button_background_outlined"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/postReplyButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Post Reply"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/button_background"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

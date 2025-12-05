@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.ReplyToThreadActivity"
+    android:background="@color/bgColor">
+
+    <LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="18dp"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="exit"
+            android:padding="2dp"
+            android:src="@drawable/rounded_close_24"
+            android:onClick="askAndPressback"/>
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Reply"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/bgColor1"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+   <androidx.core.widget.NestedScrollView
+       android:id="@+id/nestedScrollView"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintTop_toBottomOf="@id/divider"
+       app:layout_constraintBottom_toTopOf="@id/bottomLayout"
+       app:layout_constraintVertical_weight="1"
+       android:fillViewport="true"
+       android:overScrollMode="never"
+       android:scrollbars="none">
+
+       <androidx.constraintlayout.widget.ConstraintLayout
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:padding="12dp">
+
+           <com.google.android.material.imageview.ShapeableImageView
+               android:id="@+id/profileImage"
+               android:layout_width="45dp"
+               android:layout_height="45dp"
+               android:background="@color/textMain"
+               android:elevation="2dp"
+               android:scaleType="fitXY"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintTop_toTopOf="parent"
+               app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+           <com.google.android.material.imageview.ShapeableImageView
+               android:id="@+id/followImage"
+               android:layout_width="18dp"
+               android:layout_height="18dp"
+               android:background="@color/textMain"
+               android:elevation="4dp"
+               android:translationX="-4dp"
+               app:layout_constraintBottom_toBottomOf="@+id/profileImage"
+               app:layout_constraintEnd_toEndOf="@+id/profileImage"
+               app:layout_constraintStart_toEndOf="@+id/profileImage"
+               app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+               app:srcCompat="@drawable/add_24px"
+               app:strokeColor="@color/bgColor"
+               app:strokeWidth="1dp"
+               app:tint="@color/bgColor" />
+
+           <View
+               android:id="@+id/view4"
+               android:layout_width="1dp"
+               android:layout_height="0dp"
+               android:layout_marginVertical="12dp"
+               android:background="@color/textSec"
+               app:layout_constraintBottom_toTopOf="@id/myProfileImage"
+               app:layout_constraintEnd_toEndOf="@+id/profileImage"
+               app:layout_constraintStart_toStartOf="@+id/profileImage"
+               app:layout_constraintTop_toBottomOf="@+id/profileImage" />
+
+           <TextView
+               android:id="@+id/username"
+               style="@style/Base.Widget.AppCompat.TextView.TextMain"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginStart="18dp"
+               android:text="@string/sample_username"
+               app:layout_constraintStart_toEndOf="@id/profileImage"
+               app:layout_constraintTop_toTopOf="@+id/profileImage" />
+
+           <com.google.android.material.imageview.ShapeableImageView
+               android:id="@+id/verifiedImage"
+               android:layout_width="20dp"
+               android:layout_height="20dp"
+               android:layout_marginStart="4dp"
+               android:padding="2dp"
+               android:scaleType="fitXY"
+               app:layout_constraintBottom_toBottomOf="@+id/username"
+               app:layout_constraintStart_toEndOf="@+id/username"
+               app:layout_constraintTop_toTopOf="@+id/username"
+               app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+               app:srcCompat="@drawable/verified_24px" />
+
+           <TextView
+               android:id="@+id/time"
+               style="@style/Base.Widget.AppCompat.TextView.TextSec"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginStart="4dp"
+               android:text="21h"
+               app:layout_constraintStart_toEndOf="@id/verifiedImage"
+               app:layout_constraintTop_toTopOf="@id/verifiedImage" />
+
+           <TextView
+               android:id="@+id/text"
+               style="@style/Base.Widget.AppCompat.TextView.TextSec"
+               android:fontFamily="@font/poppins_regular"
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:text="text will appear here"
+               android:layout_marginTop="8dp"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintStart_toStartOf="@+id/username"
+               app:layout_constraintTop_toBottomOf="@+id/username" />
+
+           <androidx.recyclerview.widget.RecyclerView
+               android:id="@+id/imagesRecyclerView"
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="8dp"
+               android:translationZ="100dp"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintStart_toStartOf="@+id/followImage"
+               app:layout_constraintTop_toBottomOf="@id/text"
+               tools:itemCount="1"
+               tools:listitem="@layout/home_list_item_image_item" />
+
+           <LinearLayout
+               android:id="@+id/poll_layout"
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="8dp"
+               android:orientation="vertical"
+               android:paddingHorizontal="12dp"
+               android:paddingTop="12dp"
+               android:paddingBottom="8dp"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintHorizontal_weight="1"
+               app:layout_constraintStart_toStartOf="@+id/followImage"
+               app:layout_constraintTop_toBottomOf="@+id/imagesRecyclerView"
+               app:layout_goneMarginBottom="0dp"
+               app:layout_goneMarginTop="0dp">
+
+               <TextView
+                   android:id="@+id/poll_option_1"
+                   style="@style/Base.Widget.AppCompat.TextView.ButtonFilled"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:gravity="start"
+                   android:singleLine="true"
+                   android:text="Yes"
+                   android:textSize="15sp"
+                   android:visibility="gone"
+                   tools:visibility="visible"/>
+
+               <TextView
+                   android:id="@+id/poll_option_2"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:layout_marginTop="8dp"
+                   android:background="@drawable/button_background_outlined"
+                   android:singleLine="true"
+                   android:text="No"
+                   android:textColor="@color/textMain"
+                   android:textSize="15sp"
+                   android:visibility="gone"
+                   tools:visibility="visible" />
+
+               <TextView
+                   android:id="@+id/poll_option_3"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:layout_marginTop="8dp"
+                   android:background="@drawable/button_background_outlined"
+                   android:singleLine="true"
+                   android:textColor="@color/textMain"
+                   android:textSize="15sp"
+                   android:visibility="gone"
+                   tools:visibility="visible" />
+
+               <TextView
+                   android:id="@+id/poll_option_4"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:layout_marginTop="8dp"
+                   android:background="@drawable/button_background_outlined"
+                   android:singleLine="true"
+                   android:textColor="@color/textMain"
+                   android:textSize="15sp"
+                   android:visibility="gone"
+                   tools:visibility="visible" />
+
+           </LinearLayout>
+
+           <com.google.android.material.imageview.ShapeableImageView
+               android:id="@+id/myProfileImage"
+               android:layout_width="35dp"
+               android:layout_height="35dp"
+               android:layout_marginTop="8dp"
+               android:background="@color/textMain"
+               android:elevation="2dp"
+               android:scaleType="fitXY"
+               app:layout_constraintEnd_toEndOf="@+id/profileImage"
+               app:layout_constraintStart_toStartOf="@+id/profileImage"
+               app:layout_constraintTop_toBottomOf="@id/poll_layout"
+               app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+           <TextView
+               android:id="@+id/myUsername"
+               style="@style/Base.Widget.AppCompat.TextView.TextMain"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginStart="18dp"
+               android:text="@string/sample_username"
+               app:layout_constraintStart_toEndOf="@+id/myProfileImage"
+               app:layout_constraintTop_toTopOf="@+id/myProfileImage"/>
+
+           <EditText
+               android:id="@+id/edittext"
+               style="@style/Base.Widget.AppCompat.TextView.TextSec"
+               android:fontFamily="@font/poppins_regular"
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:hint="Reply to &lt; username &gt;"
+               android:layout_marginTop="8dp"
+               android:background="@android:color/transparent"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintStart_toStartOf="@+id/myUsername"
+               app:layout_constraintTop_toBottomOf="@+id/myUsername"
+               android:maxLength="500"
+               android:textColorHint="@color/textSec"
+               android:textColorHighlight="@color/bgColor1"/>
+
+           <androidx.recyclerview.widget.RecyclerView
+               android:id="@+id/replyImagesRecyclerView"
+               android:layout_width="0dp"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="8dp"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintStart_toStartOf="@+id/myUsername"
+               app:layout_constraintTop_toBottomOf="@+id/edittext"
+               tools:itemCount="1"
+               tools:listitem="@layout/layout_images_horizontal"
+               android:orientation="horizontal" />
+
+           <androidx.constraintlayout.widget.ConstraintLayout
+               android:id="@+id/constraintLayout2"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="4dp"
+               android:translationX="-8dp"
+               app:layout_constraintStart_toStartOf="@+id/myUsername"
+               app:layout_constraintTop_toBottomOf="@+id/replyImagesRecyclerView">
+
+               <ImageView
+                   android:id="@+id/insertImage"
+                   android:layout_width="30dp"
+                   android:layout_height="30dp"
+                   android:layout_marginEnd="4dp"
+                   android:padding="6dp"
+                   android:src="@drawable/photo_library_24px"
+                   app:layout_constraintBottom_toBottomOf="parent"
+                   app:layout_constraintEnd_toStartOf="@+id/insertGif"
+                   app:layout_constraintHorizontal_bias="0.5"
+                   app:layout_constraintStart_toStartOf="parent"
+                   app:layout_constraintTop_toTopOf="parent"
+                   app:tint="@color/textSec" />
+
+               <ImageView
+                   android:id="@+id/insertGif"
+                   android:layout_width="30dp"
+                   android:layout_height="30dp"
+                   android:layout_marginEnd="4dp"
+                   android:padding="6dp"
+                   android:src="@drawable/gif_box_24px"
+                   app:layout_constraintEnd_toStartOf="@+id/insertHashtag"
+                   app:layout_constraintHorizontal_bias="0.5"
+                   app:layout_constraintStart_toEndOf="@+id/insertImage"
+                   app:tint="@color/textSec"
+                   android:visibility="gone"
+                   tools:visibility="visible"/>
+
+               <ImageView
+                   android:id="@+id/insertHashtag"
+                   android:layout_width="30dp"
+                   android:layout_height="30dp"
+                   android:layout_marginEnd="4dp"
+                   android:padding="6dp"
+                   android:src="@drawable/tag_24px"
+                   app:layout_constraintEnd_toStartOf="@+id/insertPoll"
+                   app:layout_constraintHorizontal_bias="0.5"
+                   app:layout_constraintStart_toEndOf="@+id/insertGif"
+                   app:tint="@color/textSec" />
+
+               <ImageView
+                   android:id="@+id/insertPoll"
+                   android:layout_width="30dp"
+                   android:layout_height="30dp"
+                   android:padding="6dp"
+                   android:src="@drawable/segment_flipped"
+                   app:layout_constraintEnd_toEndOf="parent"
+                   app:layout_constraintHorizontal_bias="0.5"
+                   app:layout_constraintStart_toEndOf="@+id/insertHashtag"
+                   app:tint="@color/textSec"
+                   android:visibility="gone"
+                   tools:visibility="visible" />
+
+           </androidx.constraintlayout.widget.ConstraintLayout>
+
+       </androidx.constraintlayout.widget.ConstraintLayout>
+
+   </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nestedScrollView"
+        app:layout_constraintVertical_bias="1.0">
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/poppins_regular"
+            android:text="Anyone can reply &amp; quote"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/postButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/main_button"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="Post"
+            android:textColor="@color/bgColor"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

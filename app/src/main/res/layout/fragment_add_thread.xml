@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgColor"
+    tools:context=".fragments.AddThreadFragment">
+
+    <LinearLayout
+        android:id="@+id/linearLayout5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New thread"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <include
+        layout="@layout/layout_divider"
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5" />
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/shapeableImageView"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/white"
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+        app:srcCompat="@drawable/ic_launcher_foreground"
+        app:strokeColor="@color/textMain"
+        app:strokeWidth="0.1dp"
+        app:tint="@color/textMain" />
+
+    <TextView
+        android:id="@+id/textView"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/sample_username"
+        app:layout_constraintStart_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintTop_toTopOf="@+id/shapeableImageView" />
+
+    <EditText
+        android:id="@+id/threadEditText"
+        style="@style/Base.Widget.AppCompat.TextView.TextSec"
+        android:fontFamily="@font/poppins_regular"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Start a thread..."
+        android:layout_marginTop="4dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        android:maxLength="500"
+        android:textColorHint="@color/textSec"
+        android:textColorHighlight="@color/bgColor1"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/imagesRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/threadEditText"
+        tools:itemCount="1"
+        tools:listitem="@layout/layout_images_horizontal"
+        android:orientation="horizontal" />
+
+    <LinearLayout
+        android:id="@+id/attachmentLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:translationX="-8dp"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/imagesRecyclerView">
+
+        <ImageView
+            android:id="@+id/insertImage"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:padding="6dp"
+            android:src="@drawable/photo_library_24px"
+            app:tint="@color/textSec" />
+
+        <ImageView
+            android:id="@+id/insertGif"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:padding="6dp"
+            android:src="@drawable/gif_box_24px"
+            app:tint="@color/textSec" />
+
+        <ImageView
+            android:id="@+id/insertHashtag"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:padding="6dp"
+            android:src="@drawable/tag_24px"
+            app:tint="@color/textSec" />
+
+        <ImageView
+            android:id="@+id/insertPoll"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="6dp"
+            android:src="@drawable/segment_flipped"
+            app:tint="@color/textSec" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view3"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginVertical="4dp"
+        android:background="@color/textSec"
+        app:layout_constraintBottom_toTopOf="@+id/shapeableImageView5"
+        app:layout_constraintEnd_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintStart_toStartOf="@+id/shapeableImageView"
+        app:layout_constraintTop_toBottomOf="@+id/shapeableImageView" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/shapeableImageView5"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/textMain"
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/attachmentLayout"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+
+    <TextView
+        style="@style/Base.Widget.AppCompat.TextView.TextSec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@color/bgColor"
+        android:fontFamily="@font/poppins_regular"
+        android:text="Add to thread"
+        app:layout_constraintBottom_toBottomOf="@+id/shapeableImageView5"
+        app:layout_constraintStart_toEndOf="@+id/shapeableImageView5"
+        app:layout_constraintTop_toTopOf="@+id/shapeableImageView5" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/poppins_regular"
+            android:text="Your followers can reply &amp; quote"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/postButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/main_button"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="Post"
+            android:textColor="@color/bgColor" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

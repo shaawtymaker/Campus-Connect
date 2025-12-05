@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="bgColor">#0E0E0E</color>
+    <color name="bgColor1">#1B1B1B</color>
+    <color name="grey">#575757</color>
+    <color name="red">#E62B3A</color>
+    <color name="blue">#0086DE</color>
+    <color name="white">#DBDDDF</color>
+
+    <color name="textMain">#DBDDDF</color>
+    <color name="textSec">#575757</color>
+
+</resources>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.settings.FollowingFollowersProfilesActivity"
+    android:background="@color/bgColor">
+
+    <LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="12dp"
+            android:src="@drawable/rounded_close_24"
+            android:onClick="pressBack"/>
+
+        <TextView
+            android:id="@+id/username"
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="@string/sample_username"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/sortbtn"
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sort"
+            android:textSize="16sp"
+            android:paddingHorizontal="12dp"/>
+
+    </LinearLayout>
+
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:tabBackground="@color/bgColor"
+        app:tabIndicatorColor="@color/textSec"
+        app:tabIndicatorFullWidth="true"
+        app:tabSelectedTextColor="@color/textMain"
+        app:tabTextColor="@color/textSec">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Followers\n16"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Following\n28"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <include
+        layout="@layout/layout_divider"
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

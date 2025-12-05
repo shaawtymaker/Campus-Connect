@@ -1,0 +1,60 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.ThreadsCloneAndroid" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:fontFamily">@font/poppins_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:statusBarColor">@color/bgColor</item>
+        <item name="android:navigationBarColor">@color/bgColor</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+
+    <style name="Theme.ThreadsCloneAndroid" parent="Base.Theme.ThreadsCloneAndroid" />
+
+    <style name="ShapeAppearanceOverlay.App.CornerSize50Percent" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.App.CornerSize10Percent" parent="">
+        <item name="cornerSize">12%</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.TextView.TextMain" parent="">
+        <item name="android:textColor">@color/textMain</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Base.Widget.AppCompat.TextView.TextSec" parent="">
+        <item name="android:textColor">@color/textSec</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/poppins_light</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Base.Widget.AppCompat.TextView.ButtonFilled" parent="">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/bgColor</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/poppins_semi_bold</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:background">@drawable/button_background_filled</item>
+    </style>
+    <style name="Base.Widget.AppCompat.TextView.ButtonOutlined" parent="">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/textMain</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/poppins_semi_bold</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:background">@drawable/button_background_outlined</item>
+    </style>
+
+</resources>

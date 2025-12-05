@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgColor"
+    android:animateLayoutChanges="true"
+    tools:context=".activities.NewThreadActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="18dp"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="exit"
+            android:padding="2dp"
+            android:src="@drawable/rounded_close_24"
+            android:onClick="askAndPressback"/>
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="New thread"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/view2"
+        layout="@layout/layout_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/shapeableImageView"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/white"
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+        app:srcCompat="@drawable/ic_launcher_foreground"
+        app:strokeColor="@color/textMain"
+        app:strokeWidth="0.1dp"
+        app:tint="@color/textMain" />
+
+    <TextView
+        android:id="@+id/textView"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/sample_username"
+        app:layout_constraintStart_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintTop_toTopOf="@+id/shapeableImageView" />
+
+    <LinearLayout
+        android:id="@+id/linear_main_content_bg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <EditText
+            android:id="@+id/edittext"
+            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@color/bgColor"
+            android:fontFamily="@font/poppins_regular"
+            android:hint="What's new?"
+            android:imeOptions="actionNone"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:maxLength="500"
+            android:singleLine="false"
+            android:textColorHint="@color/textSec"
+            android:focusedByDefault="true"
+            android:textColorHighlight="@color/bgColor1"/>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linear_main_content_bg"
+        tools:listitem="@layout/layout_images_horizontal"
+        tools:itemCount="0"
+        android:layout_marginTop="8dp"
+        android:translationZ="2dp"/>
+
+    <LinearLayout
+        android:id="@+id/poll_layout"
+        android:layout_width="0dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_height="wrap_content"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="@+id/linear_main_content_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        app:layout_goneMarginTop="0dp"
+        app:layout_goneMarginBottom="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        android:paddingEnd="12dp"
+        android:animateLayoutChanges="true">
+
+        <EditText
+            android:id="@+id/poll_option_1_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/button_background_outlined"
+            android:hint="Yes"
+            android:textSize="15sp"
+            android:textColor="@color/textMain"
+            android:singleLine="true"
+            android:imeOptions="actionNext"/>
+
+        <EditText
+            android:id="@+id/poll_option_2_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_background_outlined"
+            android:hint="No"
+            android:textSize="15sp"
+            android:textColor="@color/textMain"
+            android:singleLine="true"
+            android:imeOptions="actionNext"/>
+
+        <EditText
+            android:id="@+id/poll_option_3_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/background_outlined_dashed_border"
+            android:textSize="15sp"
+            android:textColor="@color/textMain"
+            android:singleLine="true"
+            android:imeOptions="actionNext"/>
+        <EditText
+            android:id="@+id/poll_option_4_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/background_outlined_dashed_border"
+            android:textSize="15sp"
+            android:textColor="@color/textMain"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Base.Widget.AppCompat.TextView.TextSec"
+                android:text="Ends in 24h"
+                android:fontFamily="@font/poppins_regular"
+                android:textSize="12sp"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/poll_remove"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Base.Widget.AppCompat.TextView.TextSec"
+                android:text="Remove poll"
+                android:fontFamily="@font/poppins_regular"
+                android:textSize="12sp"
+                android:paddingHorizontal="12dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:translationX="-8dp"
+        app:layout_constraintStart_toStartOf="@+id/linear_main_content_bg"
+        app:layout_constraintTop_toBottomOf="@+id/poll_layout">
+
+        <ImageView
+            android:id="@+id/insertImage"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:padding="6dp"
+            android:src="@drawable/photo_library_24px"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/insertGif"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/textSec" />
+
+        <ImageView
+            android:id="@+id/insertGif"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:padding="6dp"
+            android:src="@drawable/gif_box_24px"
+            app:layout_constraintEnd_toStartOf="@+id/insertHashtag"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/insertImage"
+            app:tint="@color/textSec"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
+        <ImageView
+            android:id="@+id/insertHashtag"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:padding="6dp"
+            android:src="@drawable/tag_24px"
+            app:layout_constraintEnd_toStartOf="@+id/insertPoll"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/insertGif"
+            app:tint="@color/textSec" />
+
+        <ImageView
+            android:id="@+id/insertPoll"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="6dp"
+            android:src="@drawable/segment_flipped"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/insertHashtag"
+            app:tint="@color/textSec"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/view3"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginVertical="4dp"
+        android:background="@color/textSec"
+        app:layout_constraintBottom_toTopOf="@+id/shapeableImageView5"
+        app:layout_constraintEnd_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintStart_toStartOf="@+id/shapeableImageView"
+        app:layout_constraintTop_toBottomOf="@+id/shapeableImageView"
+        android:translationZ="1dp"/>
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/shapeableImageView5"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/textMain"
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="@+id/shapeableImageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+
+    <TextView
+        style="@style/Base.Widget.AppCompat.TextView.TextSec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@color/bgColor"
+        android:fontFamily="@font/poppins_regular"
+        android:text="Add to thread"
+        app:layout_constraintBottom_toBottomOf="@+id/shapeableImageView5"
+        app:layout_constraintStart_toEndOf="@+id/shapeableImageView5"
+        app:layout_constraintTop_toTopOf="@+id/shapeableImageView5" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shapeableImageView5"
+        app:layout_constraintVertical_bias="1.0">
+
+        <TextView
+            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/poppins_regular"
+            android:text="Your followers can reply &amp; quote"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/postButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/main_button"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="Post"
+            android:textColor="@color/bgColor" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

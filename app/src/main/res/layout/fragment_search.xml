@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.SearchFragment"
+    android:orientation="vertical"
+    android:background="@color/bgColor">
+
+    <TextView
+        android:id="@+id/textView8"
+        style="@style/Base.Widget.AppCompat.TextView.TextMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:text="@string/search"
+        android:textSize="26sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/searchEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:background="@drawable/search_fragment_tv_bg"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:hint="@string/search"
+        android:textColor="@color/textMain"
+        android:textColorHint="@color/textSec"
+        android:inputType="text"
+        android:maxLines="1"
+        app:drawableStartCompat="@drawable/search_24px"
+        app:drawableTint="@color/textSec"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintVertical_weight="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchEditText"
+        tools:listitem="@layout/search_frag_list_item"
+        android:overScrollMode="never"
+        android:scrollbars="none"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

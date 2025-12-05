@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity"
+    android:background="@color/bgColor"
+    android:orientation="vertical"
+    android:transitionName="splash_image">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragmentContainerView"
+                android:name="com.harsh.shah.threads.clone.fragments.HomeFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bgColor"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="2dp"
+        android:paddingVertical="8dp">
+
+        <LinearLayout
+            android:id="@+id/homeIconLayout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/searchIconLayout"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/homeIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/home_24px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/searchIconLayout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/addIconLayout"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/homeIconLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/searchIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/search_24px"
+                android:tintMode="src_in"
+                app:tint="@color/textSec" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/addIconLayout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/add_post_bg"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/favoriteIconLayout"
+            app:layout_constraintStart_toEndOf="@+id/searchIconLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/addIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/add_24px"
+                android:tintMode="src_in"
+                app:tint="@color/textSec" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/favoriteIconLayout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/personIconLayout"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/addIconLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/favoriteIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/favorite_outline_24px"
+                android:tintMode="src_in"
+                app:tint="@color/textSec" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/personIconLayout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/favoriteIconLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/personIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/person_outline_24px"
+                android:tintMode="src_in"
+                app:tint="@color/textSec" />
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</LinearLayout>

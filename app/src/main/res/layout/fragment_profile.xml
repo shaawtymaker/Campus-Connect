@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgColor"
+    android:orientation="vertical"
+    tools:context=".fragments.ProfileFragment">
+
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/bgColor"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/lockImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:scaleType="center"
+            android:src="@drawable/lock_24px" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/threadImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:scaleType="center"
+            android:src="@drawable/threads_app" />
+
+        <ImageView
+            android:id="@+id/segmentImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="8dp"
+            android:padding="8dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/segment_two_bar" />
+
+    </LinearLayout>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topBar"
+        app:layout_constraintVertical_weight="1">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/shapeableImageView2"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="14dp"
+                android:background="@color/textMain"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+            <TextView
+                android:id="@+id/name"
+                style="@style/Base.Widget.AppCompat.TextView.TextMain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="12dp"
+                android:textSize="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/shapeableImageView2"
+                tools:text="Sample Name" />
+
+            <TextView
+                android:id="@+id/username"
+                style="@style/Base.Widget.AppCompat.TextView.TextMain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="@+id/name"
+                app:layout_constraintTop_toBottomOf="@+id/name"
+                tools:text="sample_username" />
+
+            <TextView
+                android:id="@+id/bio"
+                style="@style/Base.Widget.AppCompat.TextView.TextMain"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:maxLength="200"
+                android:textStyle="normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/username"
+                app:layout_constraintTop_toBottomOf="@+id/username"
+                tools:text="bio of the user." />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/shapeableImageView3"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/textMain"
+                android:padding="1dp"
+                app:layout_constraintStart_toStartOf="@+id/bio"
+                app:layout_constraintTop_toBottomOf="@+id/bio"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                app:strokeColor="@color/bgColor"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/shapeableImageView4"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@color/textMain"
+                android:elevation="4dp"
+                android:padding="1dp"
+                android:translationX="-6dp"
+                app:layout_constraintBottom_toBottomOf="@+id/shapeableImageView3"
+                app:layout_constraintStart_toEndOf="@+id/shapeableImageView3"
+                app:layout_constraintTop_toTopOf="@+id/shapeableImageView3"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                app:strokeColor="@color/bgColor"
+                app:strokeWidth="1dp" />
+
+            <TextView
+                android:id="@+id/followers"
+                style="@style/Base.Widget.AppCompat.TextView.TextSec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/shapeableImageView4"
+                app:layout_constraintStart_toEndOf="@+id/shapeableImageView4"
+                app:layout_constraintTop_toTopOf="@+id/shapeableImageView4"
+                tools:text="16 followers" />
+
+            <TextView
+                android:id="@+id/addedLink"
+                style="@style/Base.Widget.AppCompat.TextView.TextSec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:linksClickable="true"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/followers"
+                app:layout_constraintStart_toEndOf="@+id/followers"
+                app:layout_constraintTop_toTopOf="@+id/followers"
+                tools:text="• github.com/harshshah6" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="14dp"
+                android:layout_marginTop="12dp"
+                android:paddingHorizontal="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/followers">
+
+                <TextView
+                    android:id="@+id/edit_profile"
+                    style="@style/Base.Widget.AppCompat.TextView.TextMain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_background"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
+                    android:text="Edit Profile" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp" />
+
+                <TextView
+                    android:id="@+id/share_profile"
+                    style="@style/Base.Widget.AppCompat.TextView.TextMain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_background"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
+                    android:text="Share Profile" />
+
+            </LinearLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/bgColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout6"
+                app:tabBackground="@color/bgColor"
+                app:tabIndicatorColor="@color/textMain"
+                app:tabIndicatorFullWidth="true"
+                app:tabSelectedTextColor="@color/textMain"
+                app:tabTextColor="@color/textSec">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Threads" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Replies" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Reposts" />
+
+            </com.google.android.material.tabs.TabLayout>
+
+            <include
+                android:id="@+id/divider"
+                layout="@layout/layout_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider"
+                app:layout_constraintVertical_weight="1" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
