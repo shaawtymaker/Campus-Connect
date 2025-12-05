@@ -6,6 +6,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -69,7 +71,8 @@ public class ReplyToThreadActivity extends BaseActivity {
         });
 
         if (getIntent().hasExtra("threadModel")) {
-            threadModel = (ThreadModel) getIntent().getSerializableExtra("threadModel");
+            threadModel = getIntent().getParcelableExtra("threadModel");
+            android.util.Log.d("ReplyToThread", "Received threadModel with ID: " + (threadModel != null ? threadModel.getID() : "null model"));
         }
 
         if (threadModel == null) {
@@ -98,7 +101,7 @@ public class ReplyToThreadActivity extends BaseActivity {
             String pid = mThreadsDatabaseReference.push().getKey();
             ThreadModel replyThread = new ThreadModel(
                     data,
-                    new ArrayList<>(),
+                    new HashMap<>(),
                     true,
                     false,
                     false,
@@ -116,7 +119,7 @@ public class ReplyToThreadActivity extends BaseActivity {
             );
 
             // Add reply to the original thread's comments
-            if (threadModel.getComments() == null) threadModel.setComments(new ArrayList<>());
+            if (threadModel.getComments() == null) threadModel.setComments(new HashMap<>());
             CommentsModel comment = new CommentsModel(
                     binding.edittext.getText().toString(),
                     mUser.getUid(),
@@ -125,20 +128,31 @@ public class ReplyToThreadActivity extends BaseActivity {
                     mUser.getUsername(),
                     mUser.getProfileImage()
             );
-            threadModel.getComments().add(comment);
+            threadModel.getComments().put(comment.getId(), comment);
 
             // Update original thread
-            mThreadsDatabaseReference.child(threadModel.getPostId()).setValue(threadModel);
-
-            // Save the reply as a new thread (optional, depending on design)
-            // mThreadsDatabaseReference.child(pid).setValue(replyThread);
-
-            Toast.makeText(this, "Reply posted!", Toast.LENGTH_SHORT).show();
+            if (threadModel.getID() != null && !threadModel.getID().isEmpty()) {
+                mThreadsDatabaseReference.child(threadModel.getID()).setValue(threadModel);
+                Toast.makeText(this, "Reply posted!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Error: Thread ID is missing", Toast.LENGTH_SHORT).show();
+            }
+            
             finish();
         });
 
         binding.username.setText(threadModel.getUsername());
-        binding.time.setText(Utils.calculateTimeDiff(Long.parseLong(threadModel.getTime())));
+        
+        // Safe time parsing
+        if (threadModel.getTime() != null && !threadModel.getTime().isEmpty()) {
+            try {
+                binding.time.setText(Utils.calculateTimeDiff(Long.parseLong(threadModel.getTime())));
+            } catch (NumberFormatException e) {
+                binding.time.setText("");
+            }
+        } else {
+            binding.time.setText("");
+        }
 
         binding.imagesRecyclerView.setAdapter(new HomeFragment.PostImagesListAdapter(threadModel.getImages(), false));
 

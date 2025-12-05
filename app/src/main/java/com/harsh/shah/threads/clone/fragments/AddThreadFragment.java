@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -155,7 +157,7 @@ public class AddThreadFragment extends Fragment {
         String pid = BaseActivity.mThreadsDatabaseReference.push().getKey();
         ThreadModel threadModel = new ThreadModel(
                 data,
-                new ArrayList<>(),
+                new HashMap<>(),
                 true,
                 false,
                 false,

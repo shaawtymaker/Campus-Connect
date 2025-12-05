@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,6 +68,9 @@ public class ThreadViewActivity extends BaseActivity {
                     finish();
                     return; // Don't continue processing
                 }
+                // Set the thread ID from the Firebase key
+                threadModel.setID(snapshot.getKey());
+                android.util.Log.d("ThreadViewActivity", "Thread ID set to: " + threadModel.getID() + " from key: " + snapshot.getKey());
                 currentThreadModel = threadModel;
                 setUpThreadView(threadModel);
             }
@@ -87,14 +92,87 @@ public class ThreadViewActivity extends BaseActivity {
             }
             addNewComment();
         });
+
+        // Post comment button handler - must use findViewById since visibility=gone
+        binding.getRoot().findViewById(R.id.post_comment_button).setOnClickListener(v -> {
+            android.util.Log.d("ThreadViewActivity", "Post button clicked!");
+            postComment();
+        });
     }
 
     private void addNewComment() {
+        android.util.Log.d("ThreadViewActivity", "addNewComment called!");
         if (currentThreadModel == null) {
             Toast.makeText(this, "Thread not loaded yet", Toast.LENGTH_SHORT).show();
             return;
         }
-        startActivity(new Intent(this, ReplyToThreadActivity.class).putExtra("threadModel", currentThreadModel));
+        // Show the comment input box - use findViewById since visibility=gone
+        LinearLayout commentLayout = binding.getRoot().findViewById(R.id.add_new_comment_layout);
+        EditText commentEditText = binding.getRoot().findViewById(R.id.comment_edittext);
+        
+        android.util.Log.d("ThreadViewActivity", "commentLayout found: " + (commentLayout != null));
+        
+        if (commentLayout.getVisibility() == View.VISIBLE) {
+            // Hide if already visible
+            commentLayout.setVisibility(View.GONE);
+            commentEditText.setText("");
+        } else {
+            // Show and focus
+            commentLayout.setVisibility(View.VISIBLE);
+            commentEditText.requestFocus();
+            // Show keyboard
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(commentEditText, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    private void postComment() {
+        EditText commentEditText = findViewById(R.id.comment_edittext);
+        String commentText = commentEditText.getText().toString().trim();
+        
+        if (commentText.isEmpty()) {
+            Toast.makeText(this, "Please enter a comment", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (currentThreadModel == null) {
+            Toast.makeText(this, "Error: Thread not loaded", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Create new comment
+        CommentsModel comment = new CommentsModel();
+        comment.setText(commentText);
+        comment.setUid(mUser.getUid());
+        comment.setUsername(mUser.getUsername());
+        comment.setProfileImage(mUser.getProfileImage());
+        comment.setTime(String.valueOf(Utils.getNowInMillis()));
+        
+        // Add comment to the thread
+        if (currentThreadModel.getComments() == null) {
+            currentThreadModel.setComments(new HashMap<>());
+        }
+        currentThreadModel.getComments().put(comment.getId(), comment);
+        
+        // Get thread ID from the intent or snapshot
+        String threadId = getIntent().getExtras().getString("thread");
+        if (threadId != null && !threadId.isEmpty()) {
+            mThreadsDatabaseReference.child(threadId).setValue(currentThreadModel)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Comment posted!", Toast.LENGTH_SHORT).show();
+                    commentEditText.setText("");
+                    LinearLayout commentLayout = findViewById(R.id.add_new_comment_layout);
+                    commentLayout.setVisibility(View.GONE);
+                    // Hide keyboard
+                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(commentEditText.getWindowToken(), 0);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to post comment: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+        } else {
+            Toast.makeText(this, "Error: Thread ID is missing", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showNeedPublicProfileDialog(){
@@ -213,9 +291,26 @@ public class ThreadViewActivity extends BaseActivity {
             });
         }
 
-        if(threadModel.getComments()!=null){
-            binding.commentsRecyclerView.setAdapter(new CommentsImagesListAdapter(threadModel.getComments()));
+        if(threadModel.getComments()!=null && !threadModel.getComments().isEmpty()){
+            binding.commentsRecyclerView.setAdapter(new CommentsImagesListAdapter(threadModel.getCommentsAsList()));
+        } else {
+            // Set empty adapter to avoid "no adapter" errors
+            binding.commentsRecyclerView.setAdapter(new CommentsImagesListAdapter(new ArrayList<>()));
         }
+
+        // Comment icon click listener
+        binding.linearLayout.setOnClickListener(view -> {
+            android.util.Log.d("ThreadViewActivity", "Comment icon clicked!");
+            if (mAuth.getCurrentUser() == null) {
+                startActivity(new Intent(ThreadViewActivity.this, AuthActivity.class));
+                return;
+            }
+            if (mUser != null && !mUser.isPublicAccount()) {
+                showNeedPublicProfileDialog();
+                return;
+            }
+            addNewComment();
+        });
 
         binding.likesLayout.setOnClickListener(view -> {
             if (BaseActivity.mUser == null) {
@@ -294,10 +389,26 @@ public class ThreadViewActivity extends BaseActivity {
     }
     
     private void postReply(CommentsModel parentComment, String replyText) {
+        // Null safety checks
+        if (currentThreadModel == null || currentThreadModel.getID() == null) {
+            Toast.makeText(this, "Thread not loaded", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (parentComment == null || parentComment.getId() == null || parentComment.getId().isEmpty()) {
+            Toast.makeText(this, "Invalid parent comment", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         String replyId = mThreadsDatabaseReference
             .child(currentThreadModel.getID())
             .child("comments")
             .push().getKey();
+        
+        if (replyId == null) {
+            Toast.makeText(this, "Failed to generate reply ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
         
         CommentsModel reply = new CommentsModel(
             replyText,
@@ -364,7 +475,18 @@ public class ThreadViewActivity extends BaseActivity {
             ((TextView)holder.itemView.findViewById(R.id.username)).setText(comment.getUsername());
             ((TextView)holder.itemView.findViewById(R.id.title)).setText(comment.getText());
             TextView time = holder.itemView.findViewById(R.id.time);
-            time.setText(Utils.calculateTimeDiff(Long.parseLong(comment.getTime())));
+            
+            // Safe time parsing
+            if (comment.getTime() != null && !comment.getTime().isEmpty()) {
+                try {
+                    time.setText(Utils.calculateTimeDiff(Long.parseLong(comment.getTime())));
+                } catch (NumberFormatException e) {
+                    time.setText("");
+                }
+            } else {
+                time.setText("");
+            }
+            
             TextView likes = holder.itemView.findViewById(R.id.likes);
             likes.setText(String.valueOf(comment.getLikes() == null?0:comment.getLikes().size()));
             

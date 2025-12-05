@@ -418,21 +418,38 @@
         android:layout_marginBottom="8dp"
         android:orientation="horizontal"
         android:background="@drawable/add_new_comment_background"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:visibility="gone">
 
         <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/comment_user_image"
             android:layout_width="25dp"
             android:layout_height="25dp"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
             android:background="@color/textMain"/>
 
+        <EditText
+            android:id="@+id/comment_edittext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Add a comment..."
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
+            android:textSize="13sp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@android:color/transparent"
+            android:inputType="textMultiLine|textCapSentences"
+            android:maxLines="3"/>
+
         <TextView
+            android:id="@+id/post_comment_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reply to &lt;username&gt;"
-            style="@style/Base.Widget.AppCompat.TextView.TextSec"
+            android:text="Post"
+            style="@style/Base.Widget.AppCompat.TextView.TextMain"
             android:textStyle="bold"
-            android:layout_marginHorizontal="8dp" />
+            android:textColor="@color/blue"
+            android:paddingHorizontal="8dp"/>
 
     </LinearLayout>
 

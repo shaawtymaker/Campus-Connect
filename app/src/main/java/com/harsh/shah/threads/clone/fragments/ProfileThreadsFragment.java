@@ -103,7 +103,7 @@ public class ProfileThreadsFragment extends Fragment {
                                 break;
                             case MODE_REPLIES:
                                 if (model.getComments() != null) {
-                                    for (CommentsModel comment : model.getComments()) {
+                                    for (CommentsModel comment : model.getComments().values()) {
                                         if (comment.getUserId() != null && comment.getUserId().equals(BaseActivity.mUser.getUid())) {
                                             include = true;
                                             break;

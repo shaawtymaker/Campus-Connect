@@ -6,11 +6,13 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ThreadModel implements Parcelable {
     private List<String> images = new ArrayList<>();
-    private ArrayList<CommentsModel> comments = new ArrayList<>();
+    private HashMap<String, CommentsModel> comments = new HashMap<>();
     private List<String> shares = new ArrayList<>();
     private List<String> likes = new ArrayList<>();
     private List<String> reposts = new ArrayList<>();
@@ -28,7 +30,7 @@ public class ThreadModel implements Parcelable {
     private String profileImage = "";
     private PollOptions pollOptions = new PollOptions(new PollOptions.PollOptionsItem(), new PollOptions.PollOptionsItem(), new PollOptions.PollOptionsItem(), new PollOptions.PollOptionsItem());
 
-    public ThreadModel(List<String> images, ArrayList<CommentsModel> comments, boolean allowedComments, boolean isGif, boolean isPoll, List<String> shares, String uID, String gifUrl, String iD, String text, String time, PollOptions pollOptions, List<String> likes, String profileImage, String username, List<String> reposts) {
+    public ThreadModel(List<String> images, HashMap<String, CommentsModel> comments, boolean allowedComments, boolean isGif, boolean isPoll, List<String> shares, String uID, String gifUrl, String iD, String text, String time, PollOptions pollOptions, List<String> likes, String profileImage, String username, List<String> reposts) {
         this.images = images;
         this.comments = comments;
         this.allowedComments = allowedComments;
@@ -52,7 +54,8 @@ public class ThreadModel implements Parcelable {
 
     public ThreadModel(Parcel in) {
         images = in.createStringArrayList();
-        comments = in.readParcelable(CommentsModel.class.getClassLoader());
+        // Read HashMap from Parcel
+        comments = (HashMap<String, CommentsModel>) in.readSerializable();
         allowedComments = in.readByte() != 0;
         isGif = in.readByte() != 0;
         isPoll = in.readByte() != 0;
@@ -79,12 +82,20 @@ public class ThreadModel implements Parcelable {
         this.images = images;
     }
 
-    public ArrayList<CommentsModel> getComments() {
+    public HashMap<String, CommentsModel> getComments() {
         return comments;
     }
 
-    public void setComments(ArrayList<CommentsModel> comments) {
+    public void setComments(HashMap<String, CommentsModel> comments) {
         this.comments = comments;
+    }
+    
+    // Helper method to get comments as ArrayList for adapters
+    public ArrayList<CommentsModel> getCommentsAsList() {
+        if (comments == null || comments.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(comments.values());
     }
 
     public boolean isAllowedComments() {
@@ -262,7 +273,7 @@ public class ThreadModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringList(images);
-        dest.writeList(comments);
+        dest.writeSerializable(comments);
         dest.writeByte((byte) (allowedComments ? 1 : 0));
         dest.writeByte((byte) (isGif ? 1 : 0));
         dest.writeByte((byte) (isPoll ? 1 : 0));
