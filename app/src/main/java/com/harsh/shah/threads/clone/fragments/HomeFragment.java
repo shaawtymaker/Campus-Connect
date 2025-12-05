@@ -121,11 +121,13 @@ public class HomeFragment extends Fragment {
 
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            data.clear();
+            // Reset pagination state
             lastLoadedKey = null;
             hasMoreData = true;
+            isLoading = false;
             refreshList();
-            swipeRefreshLayout.setRefreshing(false);
+            // Stop refreshing after a short delay to allow data to load
+            swipeRefreshLayout.postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 500);
         });
     }
 
@@ -145,6 +147,10 @@ public class HomeFragment extends Fragment {
                 ThreadModel threadModel = snapshot.getValue(ThreadModel.class);
                 if (threadModel != null) {
                     dataAdapter.addData(threadModel);
+                    // Track the key of the first thread for pagination
+                    if (lastLoadedKey == null || snapshot.getKey().compareTo(lastLoadedKey) < 0) {
+                        lastLoadedKey = snapshot.getKey();
+                    }
                 }
             }
 
@@ -186,22 +192,33 @@ public class HomeFragment extends Fragment {
     private void loadMoreThreads() {
         if (isLoading || !hasMoreData) return;
         
+        // Don't try to paginate if we have no data yet
+        if (data.isEmpty() || lastLoadedKey == null || lastLoadedKey.isEmpty()) {
+            Log.d(TAG, "Skipping pagination - no data loaded yet");
+            return;
+        }
+        
         isLoading = true;
         Log.d(TAG, "Loading more threads...");
         
         // Load next page of threads
-        BaseActivity.mThreadsDatabaseReference
+        com.google.firebase.database.Query query = BaseActivity.mThreadsDatabaseReference
                 .orderByKey()
-                .limitToLast(PAGE_SIZE + 1)
-                .endBefore(lastLoadedKey != null ? lastLoadedKey : "")
-                .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                .limitToLast(PAGE_SIZE + 1);
+        
+        // Only add endBefore if we have a valid lastLoadedKey
+        if (lastLoadedKey != null && !lastLoadedKey.isEmpty()) {
+            query = query.endBefore(lastLoadedKey);
+        }
+        
+        query.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         int count = 0;
                         for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                             if (count >= PAGE_SIZE) {
-                                // We have more data
-                                hasMoreData = false;
+                                // We have more data - keep hasMoreData true
+                                hasMoreData = true;
                                 break;
                             }
                             
@@ -536,7 +553,7 @@ public class HomeFragment extends Fragment {
             text.append("Posted by @").append(thread.getUsername());
             
             // Add app link (you can customize this with your actual domain)
-            text.append("\n\nView on Threads Clone");
+            text.append("\n\nView on Campus Connect");
             // text.append("\nhttps://your-domain.com/thread/").append(thread.getID());
             
             return text.toString();
