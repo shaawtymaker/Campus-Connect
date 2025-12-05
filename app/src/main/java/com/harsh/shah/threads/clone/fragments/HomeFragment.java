@@ -53,6 +53,7 @@ public class HomeFragment extends Fragment {
     private String mParam2;
     private boolean isLoading = false;
     private boolean hasMoreData = true;
+    private ChildEventListener threadsListener; // Track the listener to avoid duplicates
     private String lastLoadedKey = null;
 
     ArrayList<ThreadModel> data = new ArrayList<>();
@@ -132,7 +133,13 @@ public class HomeFragment extends Fragment {
         data.clear();
         dataAdapter.clearData();
 
-        BaseActivity.mThreadsDatabaseReference.addChildEventListener(new ChildEventListener() {
+        // Remove old listener to prevent duplicates
+        if (threadsListener != null) {
+            BaseActivity.mThreadsDatabaseReference.removeEventListener(threadsListener);
+        }
+        
+        // Create and store new listener
+        threadsListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ThreadModel threadModel = snapshot.getValue(ThreadModel.class);
@@ -169,7 +176,10 @@ public class HomeFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
             }
-        });
+        };
+        
+        // Add the listener
+        BaseActivity.mThreadsDatabaseReference.addChildEventListener(threadsListener);
     }
     
     // Load more threads for pagination
@@ -424,6 +434,16 @@ public class HomeFragment extends Fragment {
             holder.itemView.findViewById(R.id.linearLayout4).setOnClickListener(view -> {
                 shareThread(model);
             });
+            
+            // Delete button click listener - only show for user's own threads
+            ImageView moreOptionsBtn = holder.itemView.findViewById(R.id.moreOptionsImage);
+            if (model.getUserId() != null && BaseActivity.mUser != null && 
+                model.getUserId().equals(BaseActivity.mUser.getUid())) {
+                moreOptionsBtn.setVisibility(View.VISIBLE);
+                moreOptionsBtn.setOnClickListener(view -> showDeleteDialog(model));
+            } else {
+                moreOptionsBtn.setVisibility(View.GONE);
+            }
         }
 
         @Override
@@ -520,6 +540,37 @@ public class HomeFragment extends Fragment {
             // text.append("\nhttps://your-domain.com/thread/").append(thread.getID());
             
             return text.toString();
+        }
+        
+        // Show delete confirmation dialog
+        private void showDeleteDialog(ThreadModel thread) {
+            if (getContext() == null || thread == null) return;
+            
+            new android.app.AlertDialog.Builder(getContext())
+                .setTitle("Delete Thread")
+                .setMessage("Are you sure you want to delete this thread? This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    deleteThread(thread);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+        }
+        
+        // Delete thread from Firebase
+        private void deleteThread(ThreadModel thread) {
+            if (thread == null || thread.getID() == null) return;
+            
+            BaseActivity.mThreadsDatabaseReference.child(thread.getID()).removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Thread deleted", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Failed to delete thread", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
         }
         
         // Show repost dialog

@@ -62,10 +62,12 @@ public class ThreadViewActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 ThreadModel threadModel = snapshot.getValue(ThreadModel.class);
                 if (threadModel == null) {
+                    // Thread was deleted, close activity
                     finish();
+                    return; // Don't continue processing
                 }
                 currentThreadModel = threadModel;
-                setUpThreadView(threadModel == null ? new ThreadModel() : threadModel);
+                setUpThreadView(threadModel);
             }
 
             @Override
@@ -146,7 +148,17 @@ public class ThreadViewActivity extends BaseActivity {
         // Format text with clickable hashtags and mentions
         TextFormatter.applyFormattedText(binding.textPara, threadModel.getText(), this);
         binding.username.setText(threadModel.getUsername());
-        binding.time.setText(Utils.calculateTimeDiff(Long.parseLong(threadModel.getTime())));
+        
+        // Handle time parsing safely
+        if (threadModel.getTime() != null && !threadModel.getTime().isEmpty()) {
+            try {
+                binding.time.setText(Utils.calculateTimeDiff(Long.parseLong(threadModel.getTime())));
+            } catch (NumberFormatException e) {
+                binding.time.setText("");
+            }
+        } else {
+            binding.time.setText("");
+        }
 
         binding.likes.setText(String.valueOf(threadModel.getLikes() == null?0:threadModel.getLikes().size()));
         binding.comments.setText(String.valueOf(threadModel.getComments() == null?0:threadModel.getComments().size()));
