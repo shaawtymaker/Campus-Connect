@@ -1,12 +1,8 @@
 package com.harsh.shah.threads.clone.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,10 +12,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.harsh.shah.threads.clone.BaseActivity;
-import com.harsh.shah.threads.clone.R;
 import com.harsh.shah.threads.clone.databinding.ActivityHashtagBinding;
 import com.harsh.shah.threads.clone.model.ThreadModel;
-import com.harsh.shah.threads.clone.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -32,7 +26,7 @@ public class HashtagActivity extends BaseActivity {
     private ActivityHashtagBinding binding;
     private String hashtag;
     private ArrayList<ThreadModel> threads = new ArrayList<>();
-    private ThreadsAdapter adapter;
+    private RecyclerView.Adapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +52,12 @@ public class HashtagActivity extends BaseActivity {
         // Back button
         binding.backButton.setOnClickListener(v -> finish());
         
-        // Setup RecyclerView with simple adapter
+        // Setup RecyclerView
         binding.threadsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ThreadsAdapter();
-        binding.threadsRecyclerView.setAdapter(adapter);
+        
+        // You'll need to create an adapter similar to HomeFragment's adapter
+        // For now, we'll use a placeholder comment
+        // TODO: Implement proper adapter
     }
 
     private void loadThreads() {
@@ -88,7 +84,7 @@ public class HashtagActivity extends BaseActivity {
                 } else {
                     binding.emptyView.setVisibility(View.GONE);
                     binding.threadsRecyclerView.setVisibility(View.VISIBLE);
-                    adapter.notifyDataSetChanged();
+                    // TODO: Update adapter
                 }
                 
                 Log.d(TAG, "Found " + threads.size() + " threads with hashtag #" + hashtag);
@@ -101,64 +97,5 @@ public class HashtagActivity extends BaseActivity {
                 showToast("Error loading threads: " + error.getMessage());
             }
         });
-    }
-    
-    // Simple adapter for displaying threads
-    class ThreadsAdapter extends RecyclerView.Adapter<ThreadsAdapter.ViewHolder> {
-        
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.home_list_item, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            ThreadModel thread = threads.get(position);
-            
-            // Set username
-            if (holder.username != null) {
-                holder.username.setText(thread.getUsername() != null ? thread.getUsername() : "");
-            }
-            
-            // Set thread text
-            if (holder.text != null) {
-                holder.text.setText(thread.getText() != null ? thread.getText() : "");
-            }
-            
-            // Set time
-            if (holder.time != null) {
-                try {
-                    holder.time.setText(Utils.calculateTimeDiff(Long.parseLong(thread.getTime())));
-                } catch (Exception e) {
-                    holder.time.setText("");
-                }
-            }
-            
-            // Click to open thread
-            holder.itemView.setOnClickListener(v -> {
-                Intent intent = new Intent(HashtagActivity.this, ThreadViewActivity.class);
-                intent.putExtra("thread", thread.getID());
-                startActivity(intent);
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return threads.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            TextView username, text, time;
-            
-            public ViewHolder(@NonNull View itemView) {
-                super(itemView);
-                username = itemView.findViewById(R.id.username);
-                text = itemView.findViewById(R.id.title);  // Changed from textPara to title
-                time = itemView.findViewById(R.id.time);
-            }
-        }
     }
 }
