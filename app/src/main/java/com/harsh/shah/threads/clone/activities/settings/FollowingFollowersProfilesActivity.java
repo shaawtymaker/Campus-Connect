@@ -94,7 +94,7 @@ public class FollowingFollowersProfilesActivity extends BaseActivity {
         TabLayout.Tab followingTab = binding.tabLayout.getTabAt(1);
         
         if (followersTab != null) {
-            followersTab.setText("n" + followerIds.size());
+            followersTab.setText("Followers\n" + followerIds.size());
         }
         if (followingTab != null) {
             followingTab.setText("Following\n" + followingIds.size());
