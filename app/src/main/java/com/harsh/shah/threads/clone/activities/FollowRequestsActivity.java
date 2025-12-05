@@ -65,7 +65,7 @@ public class FollowRequestsActivity extends BaseActivity {
         mFollowRequestsDatabaseReference.child(mUser.getUid())
                 .orderByChild("status")
                 .equalTo("pending")
-                .addValueEventListener(new ValueEventListener() {
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         requests.clear();
@@ -107,11 +107,12 @@ public class FollowRequestsActivity extends BaseActivity {
             mUser.getFollowers().add(request.getRequesterId());
         }
         
-        // Update current user in Firebase
-        mUsersDatabaseReference.child(mUser.getUsername()).setValue(mUser);
+        // FIX: Update current user in Firebase using UID, not username
+        mUsersDatabaseReference.child(mUser.getUid()).setValue(mUser);
         
         // Add current user to requester's following list
-        mUsersDatabaseReference.child(request.getRequesterUsername())
+        // FIX: Use UID instead of username
+        mUsersDatabaseReference.child(request.getRequesterId())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -121,7 +122,8 @@ public class FollowRequestsActivity extends BaseActivity {
                             if (!requester.getFollowing().contains(mUser.getUid())) {
                                 requester.getFollowing().add(mUser.getUid());
                             }
-                            mUsersDatabaseReference.child(request.getRequesterUsername()).setValue(requester);
+                            // FIX: Use UID instead of username
+                            mUsersDatabaseReference.child(request.getRequesterId()).setValue(requester);
                         }
                     }
 
@@ -131,11 +133,10 @@ public class FollowRequestsActivity extends BaseActivity {
                     }
                 });
         
-        // Update request status to accepted
-        request.setStatus("accepted");
+        // FIX: Remove request instead of updating status
         mFollowRequestsDatabaseReference.child(mUser.getUid())
                 .child(request.getRequestId())
-                .setValue(request);
+                .removeValue();
         
         showToast("Follow request accepted");
     }

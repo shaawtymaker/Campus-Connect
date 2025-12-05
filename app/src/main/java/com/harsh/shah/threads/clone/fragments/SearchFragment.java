@@ -122,6 +122,110 @@ public class SearchFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    // Helper method to check if a follow request is pending
+    private void checkFollowRequestStatus(String targetUserId, TextView button) {
+        BaseActivity.mFollowRequestsDatabaseReference
+            .child(targetUserId)
+            .orderByChild("requesterId")
+            .equalTo(BaseActivity.mUser.getUid())
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        button.setText("Requested");
+                        button.setBackgroundResource(R.drawable.button_background_outlined);
+                        button.setTextColor(getResources().getColor(R.color.textSec));
+                    } else {
+                        button.setText("Follow");
+                        button.setBackgroundResource(R.drawable.button_background);
+                        button.setTextColor(getResources().getColor(R.color.textMain));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Default to Follow on error
+                    button.setText("Follow");
+                    button.setBackgroundResource(R.drawable.button_background);
+                    button.setTextColor(getResources().getColor(R.color.textMain));
+                }
+            });
+    }
+
+    // Helper method to cancel a pending follow request
+    private void cancelFollowRequest(String targetUserId, TextView button) {
+        BaseActivity.mFollowRequestsDatabaseReference
+            .child(targetUserId)
+            .orderByChild("requesterId")
+            .equalTo(BaseActivity.mUser.getUid())
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot requestSnapshot : snapshot.getChildren()) {
+                        requestSnapshot.getRef().removeValue();
+                    }
+                    button.setText("Follow");
+                    button.setBackgroundResource(R.drawable.button_background);
+                    button.setTextColor(getResources().getColor(R.color.textMain));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    ((BaseActivity) getActivity()).showToast("Error canceling request");
+                }
+            });
+    }
+
+    // Helper method to check and send follow request (prevents duplicates)
+    private void checkAndSendFollowRequest(UserModel user, TextView button, int position) {
+        // First check if request already exists
+        BaseActivity.mFollowRequestsDatabaseReference
+            .child(user.getUid())
+            .orderByChild("requesterId")
+            .equalTo(BaseActivity.mUser.getUid())
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Request already exists
+                        ((BaseActivity) getActivity()).showToast("Request already sent");
+                        button.setText("Requested");
+                        button.setBackgroundResource(R.drawable.button_background_outlined);
+                        button.setTextColor(getResources().getColor(R.color.textSec));
+                    } else {
+                        // Send new request
+                        String requestId = BaseActivity.mFollowRequestsDatabaseReference
+                            .child(user.getUid()).push().getKey();
+                        
+                        FollowRequestModel request = new FollowRequestModel(
+                            requestId,
+                            BaseActivity.mUser.getUid(),
+                            BaseActivity.mUser.getUsername(),
+                            BaseActivity.mUser.getName(),
+                            BaseActivity.mUser.getProfileImage(),
+                            user.getUid(),
+                            Utils.getNowInMillis() + "",
+                            "pending"
+                        );
+                        
+                        BaseActivity.mFollowRequestsDatabaseReference
+                            .child(user.getUid())
+                            .child(requestId)
+                            .setValue(request);
+                        
+                        button.setText("Requested");
+                        button.setBackgroundResource(R.drawable.button_background_outlined);
+                        button.setTextColor(getResources().getColor(R.color.textSec));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    ((BaseActivity) getActivity()).showToast("Error sending request");
+                }
+            });
+    }
+
     class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
         @NonNull
@@ -147,68 +251,62 @@ public class SearchFragment extends Fragment {
                 holder.profileImage.setImageResource(R.drawable.person_outline_24px);
             }
 
-            // Follow button logic
-            if (BaseActivity.mUser != null && BaseActivity.mUser.getFollowing() != null && BaseActivity.mUser.getFollowing().contains(user.getUid())) {
+            // FIX: Check button state - Following, Requested, or Follow
+            if (BaseActivity.mUser != null && BaseActivity.mUser.getFollowing() != null && 
+                BaseActivity.mUser.getFollowing().contains(user.getUid())) {
                 holder.followButton.setText("Following");
                 holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
                 holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
             } else {
-                holder.followButton.setText("Follow");
-                holder.followButton.setBackgroundResource(R.drawable.button_background);
-                holder.followButton.setTextColor(getResources().getColor(R.color.textMain));
+                // FIX: Check if follow request is pending
+                checkFollowRequestStatus(user.getUid(), holder.followButton);
             }
 
             holder.followButton.setOnClickListener(v -> {
                 if (BaseActivity.mUser == null) return;
                 
-                if (BaseActivity.mUser.getFollowing() != null && BaseActivity.mUser.getFollowing().contains(user.getUid())) {
+                String buttonText = holder.followButton.getText().toString();
+                
+                if (buttonText.equals("Following")) {
                     // Unfollow
                     BaseActivity.mUser.getFollowing().remove(user.getUid());
                     if (user.getFollowers() != null) user.getFollowers().remove(BaseActivity.mUser.getUid());
                     
                     BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid()).setValue(BaseActivity.mUser);
                     BaseActivity.mUsersDatabaseReference.child(user.getUid()).setValue(user);
-                } else {
-                    // Check if account is private
+                    
+                    holder.followButton.setText("Follow");
+                    holder.followButton.setBackgroundResource(R.drawable.button_background);
+                    holder.followButton.setTextColor(getResources().getColor(R.color.textMain));
+                } else if (buttonText.equals("Requested")) {
+                    // FIX: Cancel pending request
+                    cancelFollowRequest(user.getUid(), holder.followButton);
+                } else { // "Follow"
+                    // FIX: Check if account is private
                     if (!user.isPublicAccount()) {
-                        // Send follow request
-                        String requestId = BaseActivity.mFollowRequestsDatabaseReference
-                            .child(user.getUid()).push().getKey();
-                        
-                        FollowRequestModel request = new FollowRequestModel(
-                            requestId,
-                            BaseActivity.mUser.getUid(),
-                            BaseActivity.mUser.getUsername(),
-                            BaseActivity.mUser.getName(),
-                            BaseActivity.mUser.getProfileImage(),
-                            user.getUid(),
-                            Utils.getNowInMillis() + "",
-                            "pending"
-                        );
-                        
-                        BaseActivity.mFollowRequestsDatabaseReference
-                            .child(user.getUid())
-                            .child(requestId)
-                            .setValue(request);
-                        
-                        holder.followButton.setText("Requested");
-                        holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
-                        holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
+                        // FIX: Check if request already exists before sending
+                        checkAndSendFollowRequest(user, holder.followButton, position);
                     } else {
                         // Public account - direct follow
                         if (BaseActivity.mUser.getFollowing() == null) BaseActivity.mUser.setFollowing(new ArrayList<>());
-                        BaseActivity.mUser.getFollowing().add(user.getUid());
                         
-                        if (user.getFollowers() == null) user.setFollowers(new ArrayList<>());
-                        user.getFollowers().add(BaseActivity.mUser.getUid());
-                        
-                        // Update Firebase
-                        BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid()).setValue(BaseActivity.mUser);
-                        BaseActivity.mUsersDatabaseReference.child(user.getUid()).setValue(user);
+                        // FIX: Check if not already following
+                        if (!BaseActivity.mUser.getFollowing().contains(user.getUid())) {
+                            BaseActivity.mUser.getFollowing().add(user.getUid());
+                            
+                            if (user.getFollowers() == null) user.setFollowers(new ArrayList<>());
+                            user.getFollowers().add(BaseActivity.mUser.getUid());
+                            
+                            // Update Firebase
+                            BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid()).setValue(BaseActivity.mUser);
+                            BaseActivity.mUsersDatabaseReference.child(user.getUid()).setValue(user);
+                            
+                            holder.followButton.setText("Following");
+                            holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
+                            holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
+                        }
                     }
                 }
-                
-                notifyItemChanged(position);
             });
         }
 

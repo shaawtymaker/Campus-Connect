@@ -60,6 +60,11 @@ public class EditProfileActivity extends BaseActivity {
 
         binding.name.setText(String.format("%s ( %s )", mUser.getName(), mUser.getUsername()));
 
+        // FIX: Pre-populate bio, link, and toggle from mUser
+        bio = mUser.getBio() != null ? mUser.getBio() : "";
+        link = mUser.getInfoLink() != null ? mUser.getInfoLink() : "";
+        isPublicAccount = mUser.isPublicAccount();
+        
         binding.bio.setText(bio);
         if (!link.isEmpty()) binding.link.setText(link);
         binding.switchButton.setChecked(isPublicAccount);

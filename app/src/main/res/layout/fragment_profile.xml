@@ -149,7 +149,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/shapeableImageView4"
                 app:layout_constraintStart_toEndOf="@+id/shapeableImageView4"
                 app:layout_constraintTop_toTopOf="@+id/shapeableImageView4"
-                tools:text="16 followers" />
+                tools:text="followers" />
 
             <TextView
                 android:id="@+id/addedLink"

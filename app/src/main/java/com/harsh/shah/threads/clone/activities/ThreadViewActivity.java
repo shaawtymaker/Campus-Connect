@@ -148,16 +148,22 @@ public class ThreadViewActivity extends BaseActivity {
         comment.setProfileImage(mUser.getProfileImage());
         comment.setTime(String.valueOf(Utils.getNowInMillis()));
         
-        // Add comment to the thread
+        // Get thread ID from the intent
+        String threadId = getIntent().getExtras().getString("thread");
+        
+        // Generate Firebase ID for the comment FIRST
+        String commentId = mThreadsDatabaseReference.child(threadId).child("comments").push().getKey();
+        comment.setId(commentId);
+        
+        // Add comment to local model for UI update
         if (currentThreadModel.getComments() == null) {
             currentThreadModel.setComments(new HashMap<>());
         }
-        currentThreadModel.getComments().put(comment.getId(), comment);
+        currentThreadModel.getComments().put(commentId, comment);
         
-        // Get thread ID from the intent or snapshot
-        String threadId = getIntent().getExtras().getString("thread");
+        // Save ONLY the comment to Firebase (not entire ThreadModel - HashMap issue)
         if (threadId != null && !threadId.isEmpty()) {
-            mThreadsDatabaseReference.child(threadId).setValue(currentThreadModel)
+            mThreadsDatabaseReference.child(threadId).child("comments").child(commentId).setValue(comment)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Comment posted!", Toast.LENGTH_SHORT).show();
                     commentEditText.setText("");
