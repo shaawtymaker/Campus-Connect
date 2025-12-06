@@ -98,18 +98,22 @@ public class BaseActivity extends AppCompatActivity {
     };
 
     public void fetchCurrentUser(OnUserLoadedListener listener) {
+        fetchCurrentUser(false, listener);
+    }
+
+    public void fetchCurrentUser(boolean forceRefresh, OnUserLoadedListener listener) {
         if (mAuth.getCurrentUser() == null) {
             Log.d(TAG, "fetchCurrentUser: No current auth user");
             if (listener != null) listener.onUserLoaded(null);
             return;
         }
         String currentUid = mAuth.getCurrentUser().getUid();
-        Log.d(TAG, "fetchCurrentUser: Fetching for UID " + currentUid);
+        Log.d(TAG, "fetchCurrentUser: Fetching for UID " + currentUid + ", forceRefresh=" + forceRefresh);
         Log.d(TAG, "fetchCurrentUser: Database path: " + mUsersDatabaseReference.toString());
         
-        // If we already have the user, return it immediately
-        if (mUser != null && mUser.getUid().equals(currentUid)) {
-            Log.d(TAG, "fetchCurrentUser: User already loaded in memory");
+        // If we already have the user and not forcing refresh, return it immediately
+        if (!forceRefresh && mUser != null && mUser.getUid().equals(currentUid)) {
+            Log.d(TAG, "fetchCurrentUser: User already loaded in memory (using cache)");
             if (listener != null) listener.onUserLoaded(mUser);
             return;
         }
@@ -318,6 +322,9 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void logoutUser() {
+        // CRITICAL: Clear cached user data before signout
+        mUser = null;
+        
         mAuth.signOut();
         try {
             googleSignInClient.signOut();

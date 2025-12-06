@@ -89,6 +89,28 @@ public class FollowingFollowersProfilesActivity extends BaseActivity {
         binding.back.setOnClickListener(v -> finish());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh user data when returning to this screen (e.g., after accepting follow requests)
+        // Use forceRefresh=true to bypass cache and get latest data from Firebase
+        fetchCurrentUser(true, user -> {
+            if (user != null) {
+                mUser = user;
+                followerIds = mUser.getFollowers() != null ? new ArrayList<>(mUser.getFollowers()) : new ArrayList<>();
+                followingIds = mUser.getFollowing() != null ? new ArrayList<>(mUser.getFollowing()) : new ArrayList<>();
+                updateTabCounts();
+                
+                // Reload the current tab
+                if (showingFollowers) {
+                    loadFollowers();
+                } else {
+                    loadFollowing();
+                }
+            }
+        });
+    }
+
     private void updateTabCounts() {
         TabLayout.Tab followersTab = binding.tabLayout.getTabAt(0);
         TabLayout.Tab followingTab = binding.tabLayout.getTabAt(1);

@@ -101,44 +101,128 @@ public class FollowRequestsActivity extends BaseActivity {
     }
 
     private void acceptRequest(FollowRequestModel request) {
+        Log.d(TAG, "=== ACCEPT REQUEST CALLED ===");
+        Log.d(TAG, "Current User UID: " + mUser.getUid());
+        Log.d(TAG, "Requester UID: " + request.getRequesterId());
+        
         // Add requester to user's followers list
         if (mUser.getFollowers() == null) mUser.setFollowers(new ArrayList<>());
         if (!mUser.getFollowers().contains(request.getRequesterId())) {
             mUser.getFollowers().add(request.getRequesterId());
+            Log.d(TAG, "Added requester to local followers list. Total followers: " + mUser.getFollowers().size());
+        } else {
+            Log.d(TAG, "Requester already in followers list");
         }
         
         // FIX: Update current user in Firebase using UID, not username
-        mUsersDatabaseReference.child(mUser.getUid()).setValue(mUser);
-        
+        Log.d(TAG, "Updating current user in Firebase...");
+        mUsersDatabaseReference.child(mUser.getUid()).setValue(mUser)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "✓ Current user updated successfully in Firebase");
+                    // Only proceed to update requester after current user is updated
+                    updateRequesterFollowingList(request);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "✗ Error updating current user: " + e.getMessage());
+                    showToast("Error accepting request");
+                    // Rollback: Remove from local list
+                    if (mUser.getFollowers() != null) {
+                        mUser.getFollowers().remove(request.getRequesterId());
+                    }
+                });
+    }
+    
+    
+    private void updateRequesterFollowingList(FollowRequestModel request) {
+        Log.d(TAG, "Fetching requester from Firebase...");
         // Add current user to requester's following list
         // FIX: Use UID instead of username
         mUsersDatabaseReference.child(request.getRequesterId())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Log.d(TAG, "Requester data fetched");
                         UserModel requester = snapshot.getValue(UserModel.class);
                         if (requester != null) {
+                            Log.d(TAG, "Requester username: " + requester.getUsername());
                             if (requester.getFollowing() == null) requester.setFollowing(new ArrayList<>());
                             if (!requester.getFollowing().contains(mUser.getUid())) {
                                 requester.getFollowing().add(mUser.getUid());
+                                Log.d(TAG, "Added current user to requester's following. Total following: " + requester.getFollowing().size());
+                            } else {
+                                Log.d(TAG, "Current user already in requester's following");
                             }
                             // FIX: Use UID instead of username
-                            mUsersDatabaseReference.child(request.getRequesterId()).setValue(requester);
+                            Log.d(TAG, "Updating requester in Firebase...");
+                            mUsersDatabaseReference.child(request.getRequesterId()).setValue(requester)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "✓ Requester updated successfully in Firebase");
+                                        // SUCCESS: Both updates complete, now remove the request
+                                        removeFollowRequest(request);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "✗ Error updating requester: " + e.getMessage());
+                                        showToast("Error completing follow request");
+                                        // Rollback both users
+                                        if (mUser.getFollowers() != null) {
+                                            mUser.getFollowers().remove(request.getRequesterId());
+                                            mUsersDatabaseReference.child(mUser.getUid()).setValue(mUser);
+                                        }
+                                    });
+                        } else {
+                            Log.e(TAG, "✗ Requester is null!");
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Error updating requester: " + error.getMessage());
+                        Log.e(TAG, "✗ Error fetching requester: " + error.getMessage());
+                        showToast("Error completing follow request");
+                        // Rollback current user
+                        if (mUser.getFollowers() != null) {
+                            mUser.getFollowers().remove(request.getRequesterId());
+                            mUsersDatabaseReference.child(mUser.getUid()).setValue(mUser);
+                        }
                     }
                 });
-        
-        // FIX: Remove request instead of updating status
+    }
+    
+    
+    private void removeFollowRequest(FollowRequestModel request) {
+        Log.d(TAG, "Removing follow request from Firebase...");
+        // Remove request from Firebase
         mFollowRequestsDatabaseReference.child(mUser.getUid())
                 .child(request.getRequestId())
-                .removeValue();
-        
-        showToast("Follow request accepted");
+                .removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "✓ Follow request removed successfully");
+                    // Remove from local list and refresh UI
+                    requests.remove(request);
+                    adapter.notifyDataSetChanged();
+                    
+                    // Show/hide empty view
+                    if (requests.isEmpty()) {
+                        emptyView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                    
+                    showToast("Follow request accepted");
+                    Log.d(TAG, "Follow request accepted successfully");
+                    
+                    // FIX: Refresh mUser to reflect updated followers list
+                    // Use forceRefresh=true to bypass cache and get fresh data from Firebase
+                    fetchCurrentUser(true, user -> {
+                        if (user != null) {
+                            mUser = user;
+                            Log.d(TAG, "✓ mUser refreshed with forceRefresh, followers: " + mUser.getFollowers().size());
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error removing request: " + e.getMessage());
+                    // Request removal failed but follower relationship is established
+                    showToast("Follow request accepted (pending cleanup)");
+                });
     }
 
     private void rejectRequest(FollowRequestModel request) {
