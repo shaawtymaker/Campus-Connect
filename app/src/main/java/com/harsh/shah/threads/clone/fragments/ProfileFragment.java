@@ -126,6 +126,8 @@ public class ProfileFragment extends Fragment {
         view.findViewById(R.id.saved_threads_button).setOnClickListener(v -> 
             startActivity(new Intent(getContext(), com.harsh.shah.threads.clone.activities.SavedThreadsActivity.class)));
 
+        view.findViewById(R.id.share_profile).setOnClickListener(v -> shareProfile());
+
         View.OnClickListener listener = v -> startActivity(new Intent(getContext(), FollowingFollowersProfilesActivity.class));
         view.findViewById(R.id.followers).setOnClickListener(listener);
         view.findViewById(R.id.shapeableImageView4).setOnClickListener(listener);
@@ -139,6 +141,32 @@ public class ProfileFragment extends Fragment {
                 followers = view.findViewById(R.id.followers);
 
         setupDatabaseListener(name, username, bio, addedLink, followers);
+    }
+
+    private void shareProfile() {
+        if (mUser == null || getContext() == null) return;
+
+        String shareText = "Check out my profile on Campus Connect!\n\n" +
+                "Name: " + mUser.getName() + "\n" +
+                "Username: @" + mUser.getUsername();
+
+        if (mUser.getBio() != null && !mUser.getBio().isEmpty()) {
+            shareText += "\n" + mUser.getBio();
+        }
+
+        // Add app link placeholder (can be updated with deep link later)
+        shareText += "\n\nJoin the conversation on Campus Connect!";
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this profile");
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, "Share Profile via"));
+        } catch (Exception e) {
+            // Handle potential error
+        }
     }
 
     private void updateUI(TextView name, TextView username, TextView bio, TextView addedLink, TextView followers, UserModel user) {

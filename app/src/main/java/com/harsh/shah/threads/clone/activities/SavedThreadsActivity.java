@@ -87,7 +87,6 @@ public class SavedThreadsActivity extends BaseActivity {
                     ThreadModel thread = snapshot.getValue(ThreadModel.class);
                     if (thread != null) {
                         thread.setID(snapshot.getKey());
-                        savedThreads.add(thread);
                         adapter.addData(thread);
                     }
 

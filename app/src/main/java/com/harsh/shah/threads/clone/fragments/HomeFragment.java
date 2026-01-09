@@ -306,6 +306,7 @@ public class HomeFragment extends Fragment {
             params.setMargins((position == 0 && shouldHaveLeftPadding) ? dp * 60 : dp * 4, 0, dp * 4, dp * 4);
             holder.itemView.setLayoutParams(params);
             ImageView imageView = holder.itemView.findViewById(R.id.imageView);
+            imageView.setImageDrawable(null); // Clear recycled image to prevent glitch
             if (!data.get(position).isEmpty()) {
                 // Use ImageLoader instead of Glide to support Base64 images
                 ImageLoader.loadImageOrUrl(imageView, data.get(position));

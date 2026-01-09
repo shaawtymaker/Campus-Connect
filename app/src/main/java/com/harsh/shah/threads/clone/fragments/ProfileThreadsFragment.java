@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.getstream.photoview.dialog.PhotoViewDialog;
+import com.harsh.shah.threads.clone.utils.ImageLoader;
 
 public class ProfileThreadsFragment extends Fragment {
 
@@ -258,14 +259,12 @@ public class ProfileThreadsFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             ImageView imageView = holder.itemView.findViewById(R.id.imageView);
+            imageView.setImageDrawable(null); // Clear recycled image
             if (!data.get(position).isEmpty()) {
-                if (data.get(position).contains("gif"))
-                    Glide.with(holder.itemView.getContext()).asGif().load(data.get(position)).into(imageView);
-                else
-                    Glide.with(holder.itemView.getContext()).load(data.get(position)).into(imageView);
+                ImageLoader.loadImageOrUrl(imageView, data.get(position));
             }
             imageView.setOnClickListener(view -> {
-                 new PhotoViewDialog.Builder(holder.itemView.getContext(), data, (imageView1, url) -> Glide.with(holder.itemView.getContext()).load(url).into(imageView1)).withTransitionFrom(imageView).withStartPosition(position).build().show(true);
+                 new PhotoViewDialog.Builder(holder.itemView.getContext(), data, (imageView1, url) -> ImageLoader.loadImageOrUrl(imageView1, (String) url)).withTransitionFrom(imageView).withStartPosition(position).build().show(true);
             });
         }
 
