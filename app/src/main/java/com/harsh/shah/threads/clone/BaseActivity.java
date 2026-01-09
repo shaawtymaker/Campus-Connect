@@ -127,26 +127,22 @@ public class BaseActivity extends AppCompatActivity {
         }
 
         // Query users by UID and attach a persistent listener
-        Log.d(TAG, "fetchCurrentUser: Starting persistent Firebase query for UID " + currentUid);
+        Log.d(TAG, "fetchCurrentUser: Starting persistent Firebase listener for UID " + currentUid);
         currentUserListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Log.d(TAG, "fetchCurrentUser onDataChange: exists=" + snapshot.exists());
                 if (snapshot.exists()) {
-                    for (DataSnapshot child : snapshot.getChildren()) {
-                        mUser = child.getValue(UserModel.class);
-                        if (mUser != null) {
-                            Log.d(TAG, "fetchCurrentUser: mUser updated: " + mUser.getUsername());
-                            if (listener != null) listener.onUserLoaded(mUser);
-                            // We found the user, but we don't break because we want to keep the listener attached
-                            // to the parent query or we could listen to the specific child directly.
-                            // However, since we use orderByChild, the listener is on the query.
-                             return;
-                        }
+                    // DIRECT ACCESS OPTIMIZATION: Snapshot is the user node itself
+                    mUser = snapshot.getValue(UserModel.class);
+                    if (mUser != null) {
+                        Log.d(TAG, "fetchCurrentUser: mUser updated: " + mUser.getUsername());
+                        if (listener != null) listener.onUserLoaded(mUser);
                     }
+                } else {
+                    Log.w(TAG, "fetchCurrentUser: User record not found for UID: " + currentUid);
+                    if (listener != null) listener.onUserLoaded(null);
                 }
-                Log.w(TAG, "fetchCurrentUser: User record not found for UID: " + currentUid);
-                if (listener != null) listener.onUserLoaded(null);
             }
 
             @Override
@@ -156,7 +152,8 @@ public class BaseActivity extends AppCompatActivity {
             }
         };
 
-        mUsersDatabaseReference.orderByChild("uid").equalTo(currentUid).addValueEventListener(currentUserListener);
+        // CRITICAL OPTIMIZATION: Listen to specific child directly
+        mUsersDatabaseReference.child(currentUid).addValueEventListener(currentUserListener);
     }
 
     public interface OnUserLoadedListener {
