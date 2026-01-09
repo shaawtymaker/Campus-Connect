@@ -86,14 +86,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name="io.appwrite.views.CallbackActivity" android:exported="true">
-            <intent-filter android:label="android_web_auth">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="appwrite-callback-65fad68fc6a18820e902" />
-            </intent-filter>
-        </activity>
+
 
     </application>
 </manifest>
