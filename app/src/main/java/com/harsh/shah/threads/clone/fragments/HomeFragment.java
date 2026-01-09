@@ -338,7 +338,7 @@ public class HomeFragment extends Fragment {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = viewType == 1 ? LayoutInflater.from(getContext()).inflate(R.layout.main_head_layout, null) : LayoutInflater.from(getContext()).inflate(R.layout.home_list_item, null);
+            View view = viewType == 1 ? LayoutInflater.from(parent.getContext()).inflate(R.layout.main_head_layout, null) : LayoutInflater.from(parent.getContext()).inflate(R.layout.home_list_item, null);
             view.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             return new ViewHolder(view);
         }
@@ -346,7 +346,7 @@ public class HomeFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             if (getItemViewType(position) == 1) {
-                holder.itemView.setOnClickListener(view -> startActivity(new Intent(getContext(), NewThreadActivity.class)));
+                holder.itemView.setOnClickListener(view -> view.getContext().startActivity(new Intent(view.getContext(), NewThreadActivity.class)));
                 if (BaseActivity.mUser != null && BaseActivity.mUser.getUsername() != null)
                     ((TextView) holder.itemView.findViewById(R.id.username)).setText(BaseActivity.mUser.getUsername());
                 return;
@@ -376,7 +376,7 @@ public class HomeFragment extends Fragment {
             
             // Format text with clickable hashtags and mentions
             TextView titleView = holder.itemView.findViewById(R.id.title);
-            TextFormatter.applyFormattedText(titleView, model.getText() != null ? model.getText() : "", getContext());
+            TextFormatter.applyFormattedText(titleView, model.getText() != null ? model.getText() : "", holder.itemView.getContext());
 
             int likesCount = model.getLikes() != null ? model.getLikes().size() : 0;
             int commentsCount = model.getComments() != null ? model.getComments().size() : 0;
@@ -386,7 +386,7 @@ public class HomeFragment extends Fragment {
             ((TextView) holder.itemView.findViewById(R.id.comments)).setText(String.valueOf(commentsCount));
             ((TextView) holder.itemView.findViewById(R.id.reposts)).setText(String.valueOf(repostsCount));
 
-            ((RecyclerView) holder.itemView.findViewById(R.id.imagesListRecyclerView)).setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+            ((RecyclerView) holder.itemView.findViewById(R.id.imagesListRecyclerView)).setLayoutManager(new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
 
             if (model.getImages() != null && !model.getImages().isEmpty())
                 ((RecyclerView) holder.itemView.findViewById(R.id.imagesListRecyclerView)).setAdapter(new PostImagesListAdapter(model.getImages()));
@@ -413,7 +413,7 @@ public class HomeFragment extends Fragment {
                 holder.itemView.findViewById(R.id.poll_layout).setVisibility(View.GONE);
             }
 
-            holder.itemView.setOnClickListener(view -> startActivity(new Intent(getContext(), ThreadViewActivity.class).putExtra("thread", model.getID())));
+            holder.itemView.setOnClickListener(view -> view.getContext().startActivity(new Intent(view.getContext(), ThreadViewActivity.class).putExtra("thread", model.getID())));
 
             // Poll voting logic - Set up click listeners for each poll option
             if (model.isIsPoll() && model.getPollOptions() != null && BaseActivity.mUser != null) {
@@ -434,7 +434,7 @@ public class HomeFragment extends Fragment {
                     
                     pollOption1.setOnClickListener(v -> {
                         if (!isVoted) {
-                            votePoll(model, 1, newPosition);
+                            votePoll(holder.itemView.getContext(), model, 1, newPosition);
                         }
                     });
                 }
@@ -447,7 +447,7 @@ public class HomeFragment extends Fragment {
                     
                     pollOption2.setOnClickListener(v -> {
                         if (!isVoted) {
-                            votePoll(model, 2, newPosition);
+                            votePoll(holder.itemView.getContext(), model, 2, newPosition);
                         }
                     });
                 }
@@ -460,7 +460,7 @@ public class HomeFragment extends Fragment {
                     
                     pollOption3.setOnClickListener(v -> {
                         if (!isVoted) {
-                            votePoll(model, 3, newPosition);
+                            votePoll(holder.itemView.getContext(), model, 3, newPosition);
                         }
                     });
                 }
@@ -473,7 +473,7 @@ public class HomeFragment extends Fragment {
                     
                     pollOption4.setOnClickListener(v -> {
                         if (!isVoted) {
-                            votePoll(model, 4, newPosition);
+                            votePoll(holder.itemView.getContext(), model, 4, newPosition);
                         }
                     });
                 }
@@ -488,7 +488,7 @@ public class HomeFragment extends Fragment {
                 updateBookmarkIcon(bookmarkIcon, isSaved);
                 
                 bookmarkIcon.setOnClickListener(v -> {
-                    toggleSaveThread(model, bookmarkIcon);
+                    toggleSaveThread(holder.itemView.getContext(), model, bookmarkIcon);
                 });
             }
 
@@ -508,12 +508,12 @@ public class HomeFragment extends Fragment {
             
             // Repost button click listener
             holder.itemView.findViewById(R.id.linearLayout3).setOnClickListener(view -> {
-                showRepostDialog(model);
+                showRepostDialog(holder.itemView.getContext(), model);
             });
             
             // Share button click listener
             holder.itemView.findViewById(R.id.linearLayout4).setOnClickListener(view -> {
-                shareThread(model);
+                shareThread(holder.itemView.getContext(), model);
             });
             
             // Delete button click listener - only show for user's own threads
@@ -521,7 +521,7 @@ public class HomeFragment extends Fragment {
             if (model.getUserId() != null && BaseActivity.mUser != null && 
                 model.getUserId().equals(BaseActivity.mUser.getUid())) {
                 moreOptionsBtn.setVisibility(View.VISIBLE);
-                moreOptionsBtn.setOnClickListener(view -> showDeleteDialog(model));
+                moreOptionsBtn.setOnClickListener(view -> showDeleteDialog(holder.itemView.getContext(), model));
             } else {
                 moreOptionsBtn.setVisibility(View.GONE);
             }
@@ -544,7 +544,7 @@ public class HomeFragment extends Fragment {
         }
         
         // Handle poll voting
-        private void votePoll(ThreadModel thread, int optionNumber, int position) {
+        private void votePoll(android.content.Context context, ThreadModel thread, int optionNumber, int position) {
             if (thread == null || thread.getPollOptions() == null || BaseActivity.mUser == null) {
                 return;
             }
@@ -559,8 +559,8 @@ public class HomeFragment extends Fragment {
             if (thread.getPollOptions().getOption4() != null && thread.getPollOptions().getOption4().getVotes().contains(userId)) alreadyVoted = true;
             
             if (alreadyVoted) {
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "You've already voted on this poll", android.widget.Toast.LENGTH_SHORT).show();
+                if (context != null) {
+                    android.widget.Toast.makeText(context, "You've already voted on this poll", android.widget.Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -592,15 +592,15 @@ public class HomeFragment extends Fragment {
             // Update in Firebase
             BaseActivity.mThreadsDatabaseReference.child(thread.getID()).setValue(thread)
                 .addOnSuccessListener(aVoid -> {
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Vote recorded!", android.widget.Toast.LENGTH_SHORT).show();
+                    if (context != null) {
+                        android.widget.Toast.makeText(context, "Vote recorded!", android.widget.Toast.LENGTH_SHORT).show();
                     }
                     // Update UI
                     notifyItemChanged(position + 1);
                 })
                 .addOnFailureListener(e -> {
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Failed to record vote", android.widget.Toast.LENGTH_SHORT).show();
+                    if (context != null) {
+                        android.widget.Toast.makeText(context, "Failed to record vote", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
         }
@@ -652,8 +652,8 @@ public class HomeFragment extends Fragment {
         }
         
         // Share thread functionality
-        private void shareThread(ThreadModel thread) {
-            if (getContext() == null || thread == null) return;
+        private void shareThread(android.content.Context context, ThreadModel thread) {
+            if (context == null || thread == null) return;
             
             String shareText = buildShareText(thread);
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -662,7 +662,7 @@ public class HomeFragment extends Fragment {
             shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Check out this thread");
             
             try {
-                startActivity(Intent.createChooser(shareIntent, "Share via"));
+                context.startActivity(Intent.createChooser(shareIntent, "Share via"));
             } catch (Exception e) {
                 Log.e(TAG, "Error sharing thread", e);
             }
@@ -686,41 +686,41 @@ public class HomeFragment extends Fragment {
         }
         
         // Show delete confirmation dialog
-        private void showDeleteDialog(ThreadModel thread) {
-            if (getContext() == null || thread == null) return;
+        private void showDeleteDialog(android.content.Context context, ThreadModel thread) {
+            if (context == null || thread == null) return;
             
-            new android.app.AlertDialog.Builder(getContext())
+            new android.app.AlertDialog.Builder(context)
                 .setTitle("Delete Thread")
                 .setMessage("Are you sure you want to delete this thread? This action cannot be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    deleteThread(thread);
+                    deleteThread(context, thread);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
         }
         
         // Delete thread from Firebase
-        private void deleteThread(ThreadModel thread) {
+        private void deleteThread(android.content.Context context, ThreadModel thread) {
             if (thread == null || thread.getID() == null) return;
             
             BaseActivity.mThreadsDatabaseReference.child(thread.getID()).removeValue()
                 .addOnSuccessListener(aVoid -> {
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Thread deleted", android.widget.Toast.LENGTH_SHORT).show();
+                    if (context != null) {
+                        android.widget.Toast.makeText(context, "Thread deleted", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Failed to delete thread", android.widget.Toast.LENGTH_SHORT).show();
+                    if (context != null) {
+                        android.widget.Toast.makeText(context, "Failed to delete thread", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
         }
         
         // Show repost dialog
-        private void showRepostDialog(ThreadModel thread) {
-            if (getContext() == null || thread == null) return;
+        private void showRepostDialog(android.content.Context context, ThreadModel thread) {
+            if (context == null || thread == null) return;
             
-            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(getContext())
+            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(context)
                 .setView(R.layout.dialog_repost)
                 .create();
             
@@ -730,13 +730,13 @@ public class HomeFragment extends Fragment {
             if (dialogView != null) {
                 // Simple repost
                 dialogView.findViewById(R.id.simpleRepostLayout).setOnClickListener(v -> {
-                    handleSimpleRepost(thread);
+                    handleSimpleRepost(context, thread);
                     dialog.dismiss();
                 });
                 
                 // Quote repost (coming soon)
                 dialogView.findViewById(R.id.quoteRepostLayout).setOnClickListener(v -> {
-                    android.widget.Toast.makeText(getContext(), "Quote repost coming soon!", android.widget.Toast.LENGTH_SHORT).show();
+                    android.widget.Toast.makeText(context, "Quote repost coming soon!", android.widget.Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 });
                 
@@ -746,11 +746,11 @@ public class HomeFragment extends Fragment {
         }
         
         // Handle simple repost
-        private void handleSimpleRepost(ThreadModel thread) {
+        private void handleSimpleRepost(android.content.Context context, ThreadModel thread) {
             if (BaseActivity.mUser == null || thread == null || thread.getID() == null || thread.getID().isEmpty()) {
-                if (getContext() != null) {
+                if (context != null) {
                     String error = BaseActivity.mUser == null ? "User not logged in" : "Error: Thread ID is missing";
-                    android.widget.Toast.makeText(getContext(), error, android.widget.Toast.LENGTH_SHORT).show();
+                    android.widget.Toast.makeText(context, error, android.widget.Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -764,11 +764,11 @@ public class HomeFragment extends Fragment {
             if (thread.getReposts().contains(userId)) {
                 // Un-repost
                 thread.getReposts().remove(userId);
-                android.widget.Toast.makeText(getContext(), "Removed repost", android.widget.Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(context, "Removed repost", android.widget.Toast.LENGTH_SHORT).show();
             } else {
                 // Repost
                 thread.getReposts().add(userId);
-                android.widget.Toast.makeText(getContext(), "Reposted!", android.widget.Toast.LENGTH_SHORT).show();
+                android.widget.Toast.makeText(context, "Reposted!", android.widget.Toast.LENGTH_SHORT).show();
             }
             
             // Update in Firebase
@@ -777,10 +777,10 @@ public class HomeFragment extends Fragment {
         }
         
         // Toggle save/unsave thread
-        private void toggleSaveThread(ThreadModel thread, ImageView bookmarkIcon) {
+        private void toggleSaveThread(android.content.Context context, ThreadModel thread, ImageView bookmarkIcon) {
             if (BaseActivity.mUser == null || thread == null || thread.getID() == null) {
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Error saving thread", android.widget.Toast.LENGTH_SHORT).show();
+                if (context != null) {
+                    android.widget.Toast.makeText(context, "Error saving thread", android.widget.Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -795,15 +795,15 @@ public class HomeFragment extends Fragment {
                 // Unsave
                 BaseActivity.mUser.getSavedThreads().remove(thread.getID());
                 updateBookmarkIcon(bookmarkIcon, false);
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Removed from saved", android.widget.Toast.LENGTH_SHORT).show();
+                if (context != null) {
+                    android.widget.Toast.makeText(context, "Removed from saved", android.widget.Toast.LENGTH_SHORT).show();
                 }
             } else {
                 // Save
                 BaseActivity.mUser.getSavedThreads().add(thread.getID());
                 updateBookmarkIcon(bookmarkIcon, true);
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Thread saved!", android.widget.Toast.LENGTH_SHORT).show();
+                if (context != null) {
+                    android.widget.Toast.makeText(context, "Thread saved!", android.widget.Toast.LENGTH_SHORT).show();
                 }
             }
             
@@ -814,13 +814,14 @@ public class HomeFragment extends Fragment {
         }
         
         // Update bookmark icon based on save state
+        // Update bookmark icon based on save state
         private void updateBookmarkIcon(ImageView icon, boolean isSaved) {
             if (isSaved) {
                 icon.setImageResource(R.drawable.favorite_24px); // Use filled icon as bookmark
-                icon.setColorFilter(getResources().getColor(R.color.blue));
+                icon.setColorFilter(icon.getResources().getColor(R.color.blue));
             } else {
                 icon.setImageResource(R.drawable.add_24px); // Use outline icon
-                icon.setColorFilter(getResources().getColor(R.color.textSec));
+                icon.setColorFilter(icon.getResources().getColor(R.color.textSec));
             }
         }
     }
