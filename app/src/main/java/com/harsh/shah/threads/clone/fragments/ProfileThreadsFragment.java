@@ -199,8 +199,54 @@ public class ProfileThreadsFragment extends Fragment {
                 imagesList.setVisibility(View.GONE);
             }
 
-            // Poll logic omitted for brevity, can be added if needed
-            holder.itemView.findViewById(R.id.poll_layout).setVisibility(View.GONE);
+            // Poll logic
+            if (model.isIsPoll() && model.getPollOptions() != null) {
+                holder.itemView.findViewById(R.id.poll_layout).setVisibility(View.VISIBLE);
+                holder.itemView.findViewById(R.id.imagesListRecyclerView).setVisibility(View.GONE);
+
+                if (model.getPollOptions().getOption1() != null)
+                    ((TextView) holder.itemView.findViewById(R.id.poll_option_1)).setText(model.getPollOptions().getOption1().getText());
+
+                if (model.getPollOptions().getOption2() != null)
+                    ((TextView) holder.itemView.findViewById(R.id.poll_option_2)).setText(model.getPollOptions().getOption2().getText());
+
+                if (model.getPollOptions().getOption3() != null && model.getPollOptions().getOption3().getVisibility()) {
+                    ((TextView) holder.itemView.findViewById(R.id.poll_option_3)).setVisibility(View.VISIBLE);
+                    ((TextView) holder.itemView.findViewById(R.id.poll_option_3)).setText(model.getPollOptions().getOption3().getText());
+                }
+                if (model.getPollOptions().getOption4() != null && model.getPollOptions().getOption4().getVisibility()) {
+                    ((TextView) holder.itemView.findViewById(R.id.poll_option_4)).setVisibility(View.VISIBLE);
+                    ((TextView) holder.itemView.findViewById(R.id.poll_option_4)).setText(model.getPollOptions().getOption4().getText());
+                }
+
+                // Poll voting logic
+                if (BaseActivity.mUser != null) {
+                    String userId = BaseActivity.mUser.getUid();
+                    
+                    // Check if user has already voted
+                    boolean hasVoted = false;
+                    if (model.getPollOptions().getOption1() != null && model.getPollOptions().getOption1().getVotes().contains(userId)) hasVoted = true;
+                    if (model.getPollOptions().getOption2() != null && model.getPollOptions().getOption2().getVotes().contains(userId)) hasVoted = true;
+                    if (model.getPollOptions().getOption3() != null && model.getPollOptions().getOption3().getVotes().contains(userId)) hasVoted = true;
+                    if (model.getPollOptions().getOption4() != null && model.getPollOptions().getOption4().getVotes().contains(userId)) hasVoted = true;
+
+                    if (!hasVoted) {
+                        holder.itemView.findViewById(R.id.poll_option_1).setOnClickListener(v -> votePoll(holder.itemView.getContext(), model, 1, position));
+                        holder.itemView.findViewById(R.id.poll_option_2).setOnClickListener(v -> votePoll(holder.itemView.getContext(), model, 2, position));
+                        holder.itemView.findViewById(R.id.poll_option_3).setOnClickListener(v -> votePoll(holder.itemView.getContext(), model, 3, position));
+                        holder.itemView.findViewById(R.id.poll_option_4).setOnClickListener(v -> votePoll(holder.itemView.getContext(), model, 4, position));
+                    } else {
+                        // Show results logic similar to HomeFragment could be added here
+                        // For now we just disable clicks to prevent re-voting
+                        holder.itemView.findViewById(R.id.poll_option_1).setOnClickListener(v -> android.widget.Toast.makeText(holder.itemView.getContext(), "You've already voted", android.widget.Toast.LENGTH_SHORT).show());
+                        holder.itemView.findViewById(R.id.poll_option_2).setOnClickListener(v -> android.widget.Toast.makeText(holder.itemView.getContext(), "You've already voted", android.widget.Toast.LENGTH_SHORT).show());
+                        holder.itemView.findViewById(R.id.poll_option_3).setOnClickListener(v -> android.widget.Toast.makeText(holder.itemView.getContext(), "You've already voted", android.widget.Toast.LENGTH_SHORT).show());
+                        holder.itemView.findViewById(R.id.poll_option_4).setOnClickListener(v -> android.widget.Toast.makeText(holder.itemView.getContext(), "You've already voted", android.widget.Toast.LENGTH_SHORT).show());
+                    }
+                }
+            } else {
+                holder.itemView.findViewById(R.id.poll_layout).setVisibility(View.GONE);
+            }
 
             holder.itemView.setOnClickListener(view -> startActivity(new Intent(getContext(), ThreadViewActivity.class).putExtra("thread", model.getID())));
 
@@ -235,11 +281,73 @@ public class ProfileThreadsFragment extends Fragment {
             }
         }
 
+        private void votePoll(android.content.Context context, ThreadModel thread, int optionNumber, int position) {
+            if (thread == null || thread.getPollOptions() == null || BaseActivity.mUser == null) {
+                return;
+            }
+            
+            String userId = BaseActivity.mUser.getUid();
+            
+            // Check if user already voted on any option (prevent multiple votes)
+            boolean alreadyVoted = false;
+            if (thread.getPollOptions().getOption1() != null && thread.getPollOptions().getOption1().getVotes().contains(userId)) alreadyVoted = true;
+            if (thread.getPollOptions().getOption2() != null && thread.getPollOptions().getOption2().getVotes().contains(userId)) alreadyVoted = true;
+            if (thread.getPollOptions().getOption3() != null && thread.getPollOptions().getOption3().getVotes().contains(userId)) alreadyVoted = true;
+            if (thread.getPollOptions().getOption4() != null && thread.getPollOptions().getOption4().getVotes().contains(userId)) alreadyVoted = true;
+            
+            if (alreadyVoted) {
+                if (context != null) {
+                    android.widget.Toast.makeText(context, "You've already voted on this poll", android.widget.Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            
+            // Add vote to selected option
+            switch (optionNumber) {
+                case 1:
+                    if (thread.getPollOptions().getOption1() != null) {
+                        thread.getPollOptions().getOption1().getVotes().add(userId);
+                    }
+                    break;
+                case 2:
+                    if (thread.getPollOptions().getOption2() != null) {
+                        thread.getPollOptions().getOption2().getVotes().add(userId);
+                    }
+                    break;
+                case 3:
+                    if (thread.getPollOptions().getOption3() != null) {
+                        thread.getPollOptions().getOption3().getVotes().add(userId);
+                    }
+                    break;
+                case 4:
+                    if (thread.getPollOptions().getOption4() != null) {
+                        thread.getPollOptions().getOption4().getVotes().add(userId);
+                    }
+                    break;
+            }
+            
+            // Update in Firebase
+            BaseActivity.mThreadsDatabaseReference.child(thread.getID()).setValue(thread)
+                .addOnSuccessListener(aVoid -> {
+                    if (context != null) {
+                        android.widget.Toast.makeText(context, "Vote recorded!", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                    // Update UI
+                    notifyItemChanged(position);
+                })
+                .addOnFailureListener(e -> {
+                    if (context != null) {
+                        android.widget.Toast.makeText(context, "Failed to record vote", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
+        }
+
         class ViewHolder extends RecyclerView.ViewHolder {
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
             }
-        }
+
+    }
     }
 
     public static class PostImagesListAdapter extends RecyclerView.Adapter<PostImagesListAdapter.ViewHolder> {
