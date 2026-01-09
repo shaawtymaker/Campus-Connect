@@ -200,14 +200,52 @@ public class NewThreadActivity extends BaseActivity {
             return;
         }
 
-        ArrayList<String> localUris = adapter.getData();
-        if (localUris != null && !localUris.isEmpty()) {
-            // We have images to upload
-            uploadImages(localUris);
+        String threadText = binding.edittext.getText().toString();
+        
+        // Extract URL from text
+        String url = extractUrl(threadText);
+        
+        // Use LinkPreviewUtil if URL exists AND no images are selected (link preview usually secondary to images)
+        if (url != null && !url.isEmpty() && adapter.getData().isEmpty()) {
+            showProgressDialog(); // Show dialog while fetching preview
+            com.harsh.shah.threads.clone.utils.LinkPreviewUtil.fetchPreview(url, new com.harsh.shah.threads.clone.utils.LinkPreviewUtil.PreviewCallback() {
+                @Override
+                public void onPreviewLoaded(com.harsh.shah.threads.clone.utils.LinkPreviewUtil.LinkPreview preview) {
+                    // Passed to upload/save
+                    saveThreadWithPreview(preview);
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.e("NewThreadActivity", "Error fetching preview", e);
+                    // Continue without preview
+                    saveThreadWithPreview(null);
+                }
+            });
         } else {
-            // Post text-only thread
-            saveThreadToFirebase(new ArrayList<>());
+            // Normal flow
+             ArrayList<String> localUris = adapter.getData();
+            if (localUris != null && !localUris.isEmpty()) {
+                uploadImages(localUris);
+            } else {
+                saveThreadToFirebase(new ArrayList<>());
+            }
         }
+    }
+
+    private String extractUrl(String text) {
+        java.util.regex.Matcher m = android.util.Patterns.WEB_URL.matcher(text);
+        if (m.find()) {
+            return m.group();
+        }
+        return null;
+    }
+    
+    private void saveThreadWithPreview(com.harsh.shah.threads.clone.utils.LinkPreviewUtil.LinkPreview preview) {
+        ArrayList<String> remoteUrls = new ArrayList<>(); // Empty since we handled image case separately or in normal flow
+        // But wait, if we are here, we know adapter.getData() is empty
+        
+        saveThreadToFirebase(remoteUrls, preview);
     }
 
     private void uploadImages(ArrayList<String> localUris) {
@@ -267,6 +305,10 @@ public class NewThreadActivity extends BaseActivity {
     }
 
     private void saveThreadToFirebase(ArrayList<String> remoteUrls) {
+        saveThreadToFirebase(remoteUrls, null);
+    }
+
+    private void saveThreadToFirebase(ArrayList<String> remoteUrls, com.harsh.shah.threads.clone.utils.LinkPreviewUtil.LinkPreview preview) {
         final String pid = mThreadsDatabaseReference.push().getKey();
         final String threadText = binding.edittext.getText().toString();
 
@@ -322,6 +364,14 @@ public class NewThreadActivity extends BaseActivity {
         // Set hashtags and mentions
         threadModel.setHashtags(hashtags);
         threadModel.setMentions(mentions);
+        
+        // Set Link Preview Data
+        if (preview != null) {
+            threadModel.setLinkUrl(preview.url);
+            threadModel.setLinkTitle(preview.title);
+            threadModel.setLinkDescription(preview.description);
+            threadModel.setLinkImage(preview.imageUrl);
+        }
         
         if (remoteUrls.isEmpty()) showProgressDialog(); // Only show if not already showing from upload
 

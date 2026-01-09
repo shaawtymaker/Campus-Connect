@@ -392,9 +392,49 @@ public class HomeFragment extends Fragment {
             if (model.getImages() != null && !model.getImages().isEmpty())
                 ((RecyclerView) holder.itemView.findViewById(R.id.imagesListRecyclerView)).setAdapter(new PostImagesListAdapter(model.getImages()));
 
+            // Link Preview Logic
+            android.view.View linkPreviewCard = holder.itemView.findViewById(R.id.link_preview_card);
+            
+            // Only show link preview if there are NO images (to avoid clutter) AND we have a valid link
+            if ((model.getImages() == null || model.getImages().isEmpty()) && 
+                model.getLinkUrl() != null && !model.getLinkUrl().isEmpty()) {
+                
+                linkPreviewCard.setVisibility(View.VISIBLE);
+                holder.itemView.findViewById(R.id.imagesListRecyclerView).setVisibility(View.GONE); // Double ensure
+                
+                TextView linkTitle = holder.itemView.findViewById(R.id.link_preview_title);
+                TextView linkDesc = holder.itemView.findViewById(R.id.link_preview_description);
+                TextView linkUrl = holder.itemView.findViewById(R.id.link_preview_url);
+                ImageView linkImage = holder.itemView.findViewById(R.id.link_preview_image);
+                
+                linkTitle.setText(model.getLinkTitle() != null && !model.getLinkTitle().isEmpty() ? model.getLinkTitle() : model.getLinkUrl());
+                linkDesc.setText(model.getLinkDescription() != null ? model.getLinkDescription() : "");
+                linkUrl.setText(model.getLinkUrl());
+                
+                if (model.getLinkImage() != null && !model.getLinkImage().isEmpty()) {
+                    linkImage.setVisibility(View.VISIBLE);
+                     Picasso.get().load(model.getLinkImage()).into(linkImage);
+                } else {
+                    linkImage.setVisibility(View.GONE);
+                }
+                
+                linkPreviewCard.setOnClickListener(v -> {
+                     try {
+                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(model.getLinkUrl()));
+                         holder.itemView.getContext().startActivity(browserIntent);
+                     } catch (Exception e) {
+                         Log.e(TAG, "Error opening link", e);
+                     }
+                });
+                
+            } else {
+                linkPreviewCard.setVisibility(View.GONE);
+            }
+
             if (model.isIsPoll() && model.getPollOptions() != null) {
                 holder.itemView.findViewById(R.id.poll_layout).setVisibility(View.VISIBLE);
                 holder.itemView.findViewById(R.id.imagesListRecyclerView).setVisibility(View.GONE);
+                linkPreviewCard.setVisibility(View.GONE); // Polls also take precedence over links
 
                 if (model.getPollOptions().getOption1() != null)
                     ((TextView) holder.itemView.findViewById(R.id.poll_option_1)).setText(model.getPollOptions().getOption1().getText());

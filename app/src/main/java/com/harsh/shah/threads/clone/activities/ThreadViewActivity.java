@@ -256,18 +256,63 @@ public class ThreadViewActivity extends BaseActivity {
         binding.reposts.setText(String.valueOf(threadModel.getReposts() == null?0:threadModel.getReposts().size()));
 
         binding.postRecyclerView.setAdapter(new HomeFragment.PostImagesListAdapter(threadModel.getImages(), false));
+        
+        // Link Preview Logic
+        android.view.View linkPreviewCard = binding.getRoot().findViewById(R.id.link_preview_card);
+        
+        if ((threadModel.getImages() == null || threadModel.getImages().isEmpty()) && 
+            threadModel.getLinkUrl() != null && !threadModel.getLinkUrl().isEmpty()) {
+            
+            linkPreviewCard.setVisibility(View.VISIBLE);
+            binding.postRecyclerView.setVisibility(View.GONE); 
+            
+            TextView linkTitle = binding.getRoot().findViewById(R.id.link_preview_title);
+            TextView linkDesc = binding.getRoot().findViewById(R.id.link_preview_description);
+            TextView linkUrl = binding.getRoot().findViewById(R.id.link_preview_url);
+            ImageView linkImage = binding.getRoot().findViewById(R.id.link_preview_image);
+            
+            linkTitle.setText(threadModel.getLinkTitle() != null && !threadModel.getLinkTitle().isEmpty() ? threadModel.getLinkTitle() : threadModel.getLinkUrl());
+            linkDesc.setText(threadModel.getLinkDescription() != null ? threadModel.getLinkDescription() : "");
+            linkUrl.setText(threadModel.getLinkUrl());
+            
+            if (threadModel.getLinkImage() != null && !threadModel.getLinkImage().isEmpty()) {
+                linkImage.setVisibility(View.VISIBLE);
+                com.squareup.picasso.Picasso.get().load(threadModel.getLinkImage()).into(linkImage);
+            } else {
+                linkImage.setVisibility(View.GONE);
+            }
+            
+            linkPreviewCard.setOnClickListener(v -> {
+                 try {
+                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(threadModel.getLinkUrl()));
+                     startActivity(browserIntent);
+                 } catch (Exception e) {
+                     Log.e("ThreadViewActivity", "Error opening link", e);
+                 }
+            });
+            
+        } else {
+            linkPreviewCard.setVisibility(View.GONE);
+            // Only show image recycler if images exist
+            if (threadModel.getImages() != null && !threadModel.getImages().isEmpty()) {
+                binding.postRecyclerView.setVisibility(View.VISIBLE);
+            } else {
+                binding.postRecyclerView.setVisibility(View.GONE);
+            }
+        }
 
         // Enable poll display
         if(threadModel.isIsPoll() && threadModel.getPollOptions() != null) {
             binding.pollLayout.setVisibility(View.VISIBLE);
             binding.postRecyclerView.setVisibility(View.GONE);
+            linkPreviewCard.setVisibility(View.GONE); // Polls take precedence
             
             // Display poll options and set up voting
             setupPollVoting(threadModel);
         }
         else {
             binding.pollLayout.setVisibility(View.GONE);
-            binding.postRecyclerView.setVisibility(View.VISIBLE);
+            // Visibility of other items handled above
         }
 
         if(threadModel.getComments()!=null && !threadModel.getComments().isEmpty()){

@@ -62,7 +62,6 @@ dependencies {
     implementation(libs.photoview.dialog)
 
 
-    implementation libs.ivcompressor
-    implementation libs.jave.all.deps
 
+    implementation 'org.jsoup:jsoup:1.17.2'
 }

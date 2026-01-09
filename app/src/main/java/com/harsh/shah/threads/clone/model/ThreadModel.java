@@ -72,6 +72,10 @@ public class ThreadModel implements Parcelable {
         reposts = in.createStringArrayList();
         hashtags = in.createStringArrayList();
         mentions = in.createStringArrayList();
+        linkUrl = in.readString();
+        linkTitle = in.readString();
+        linkDescription = in.readString();
+        linkImage = in.readString();
     }
 
     public List<String> getImages() {
@@ -223,12 +227,50 @@ public class ThreadModel implements Parcelable {
         this.hashtags = hashtags;
     }
 
+
+    private String linkUrl = "";
+    private String linkTitle = "";
+    private String linkDescription = "";
+    private String linkImage = "";
+
     public List<String> getMentions() {
         return mentions;
     }
 
     public void setMentions(List<String> mentions) {
         this.mentions = mentions;
+    }
+
+    public String getLinkUrl() {
+        return linkUrl;
+    }
+
+    public void setLinkUrl(String linkUrl) {
+        this.linkUrl = linkUrl;
+    }
+
+    public String getLinkTitle() {
+        return linkTitle;
+    }
+
+    public void setLinkTitle(String linkTitle) {
+        this.linkTitle = linkTitle;
+    }
+
+    public String getLinkDescription() {
+        return linkDescription;
+    }
+
+    public void setLinkDescription(String linkDescription) {
+        this.linkDescription = linkDescription;
+    }
+
+    public String getLinkImage() {
+        return linkImage;
+    }
+
+    public void setLinkImage(String linkImage) {
+        this.linkImage = linkImage;
     }
 
 
@@ -293,6 +335,10 @@ public class ThreadModel implements Parcelable {
         dest.writeStringList(reposts);
         dest.writeStringList(hashtags);
         dest.writeStringList(mentions);
+        dest.writeString(linkUrl);
+        dest.writeString(linkTitle);
+        dest.writeString(linkDescription);
+        dest.writeString(linkImage);
     }
 
     public String getUserId() {
