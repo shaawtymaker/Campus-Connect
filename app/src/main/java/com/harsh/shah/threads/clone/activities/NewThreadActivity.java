@@ -244,9 +244,10 @@ public class NewThreadActivity extends BaseActivity {
             String fileId = UUID.randomUUID().toString();
             StorageHelper.getInstance(this).uploadFile(bytes, "image_" + index + ".jpg", fileId, new StorageHelper.UploadCallback() {
                 @Override
-                public void onSuccess(String viewUrl) {
-                    Log.d("NewThreadActivity", "Successfully uploaded image " + index + ": " + viewUrl);
-                    remoteUrls.add(viewUrl);
+                public void onSuccess(String imageId) {
+                    Log.d("NewThreadActivity", "Successfully uploaded image " + index + " with ID: " + imageId);
+                    // Store image ID instead of URL (will be used to load from Database)
+                    remoteUrls.add(imageId);
                     processUpload(localUris, index + 1, remoteUrls);
                 }
 

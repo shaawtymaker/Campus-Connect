@@ -1,22 +1,26 @@
 package com.harsh.shah.threads.clone.database;
 
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
 
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class StorageHelper {
 
     private static final String TAG = "StorageHelper";
-    private static final String STORAGE_PATH = "thread_images";
+    private static final String STORAGE_NODE = "images";
 
     private static StorageHelper instance;
-    private final FirebaseStorage storage;
+    private final DatabaseReference imagesRef;
 
     private StorageHelper(Context context) {
-        storage = FirebaseStorage.getInstance();
+        imagesRef = FirebaseDatabase.getInstance().getReference(STORAGE_NODE);
     }
 
     public static StorageHelper getInstance(Context context) {
@@ -27,56 +31,71 @@ public class StorageHelper {
     }
 
     public interface UploadCallback {
-        void onSuccess(String downloadUrl);
+        void onSuccess(String imageId);
         void onFailure(Exception e);
     }
 
     public void uploadFile(byte[] bytes, String fileName, String id, UploadCallback callback) {
         try {
-            // Create reference to image location
-            StorageReference imageRef = storage.getReference()
-                    .child(STORAGE_PATH)
-                    .child(id + ".jpg");
-
-            Log.d(TAG, "Attempting upload: " + fileName + " (ID: " + id + ")");
-            Log.d(TAG, "Storage path: " + STORAGE_PATH + "/" + id + ".jpg");
-
-            // Upload the file
-            UploadTask uploadTask = imageRef.putBytes(bytes);
+            Log.d(TAG, "Converting image to Base64: " + fileName + " (ID: " + id + ")");
             
-            uploadTask.addOnSuccessListener(taskSnapshot -> {
-                // Get download URL after successful upload
-                imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    String downloadUrl = uri.toString();
-                    Log.d(TAG, "Upload success: " + downloadUrl);
-                    if (callback != null) callback.onSuccess(downloadUrl);
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to get download URL: ", e);
-                    if (callback != null) callback.onFailure(e);
-                });
-            }).addOnFailureListener(e -> {
-                Log.e(TAG, "Upload failed: ", e);
-                Log.e(TAG, "Error details: " + e.getMessage());
-                if (callback != null) callback.onFailure(e);
-            });
+            // Convert bytes to Base64 string
+            String base64Image = Base64.encodeToString(bytes, Base64.DEFAULT);
+            
+            // Create image data
+            Map<String, Object> imageData = new HashMap<>();
+            imageData.put("data", base64Image);
+            imageData.put("fileName", fileName);
+            imageData.put("uploadTime", System.currentTimeMillis());
+            
+            // Store in Firebase Database under "images/{id}"
+            imagesRef.child(id).setValue(imageData)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Image stored successfully: " + id);
+                        if (callback != null) callback.onSuccess(id);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to store image: ", e);
+                        if (callback != null) callback.onFailure(e);
+                    });
 
         } catch (Exception e) {
-            Log.e(TAG, "Exception during upload setup: ", e);
+            Log.e(TAG, "Exception during image encoding: ", e);
             if (callback != null) callback.onFailure(e);
         }
     }
 
     public void deleteFile(String id) {
-        StorageReference imageRef = storage.getReference()
-                .child(STORAGE_PATH)
-                .child(id + ".jpg");
-        
-        imageRef.delete()
+        imagesRef.child(id).removeValue()
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "Delete success: " + id);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Delete failed: ", e);
+                });
+    }
+    
+    /**
+     * Get Base64 data for an image ID
+     * Use this with a custom Glide loader or decode manually
+     */
+    public interface ImageLoadCallback {
+        void onImageLoaded(String base64Data);
+        void onFailure(Exception e);
+    }
+    
+    public void getImageData(String imageId, ImageLoadCallback callback) {
+        imagesRef.child(imageId).child("data").get()
+                .addOnSuccessListener(snapshot -> {
+                    String base64 = snapshot.getValue(String.class);
+                    if (base64 != null && callback != null) {
+                        callback.onImageLoaded(base64);
+                    } else if (callback != null) {
+                        callback.onFailure(new Exception("Image not found"));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
                 });
     }
 }
