@@ -209,6 +209,18 @@ public class FollowRequestsActivity extends BaseActivity {
                     showToast("Follow request accepted");
                     Log.d(TAG, "Follow request accepted successfully");
                     
+                    // Send notification to requester
+                    String notificationId = mNotificationsDatabaseReference.push().getKey();
+                    com.harsh.shah.threads.clone.model.NotificationModel notification = new com.harsh.shah.threads.clone.model.NotificationModel(
+                        notificationId,
+                        "FOLLOW_ACCEPTED",
+                        mUser.getUid(),
+                        com.harsh.shah.threads.clone.utils.Utils.getNowInMillis() + "",
+                        "",
+                        "accepted your follow request"
+                    );
+                    mNotificationsDatabaseReference.child(request.getRequesterId()).child(notificationId).setValue(notification);
+                    
                     // FIX: Refresh mUser to reflect updated followers list
                     // Use forceRefresh=true to bypass cache and get fresh data from Firebase
                     fetchCurrentUser(true, user -> {
@@ -255,6 +267,12 @@ public class FollowRequestsActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             FollowRequestModel request = requests.get(position);
+            
+            holder.itemView.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(v.getContext(), com.harsh.shah.threads.clone.activities.OtherUserProfileActivity.class);
+                intent.putExtra("uid", request.getRequesterId());
+                v.getContext().startActivity(intent);
+            });
             
             holder.username.setText(request.getRequesterUsername());
             holder.name.setText(request.getRequesterName());

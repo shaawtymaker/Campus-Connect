@@ -192,8 +192,9 @@ public class ProfileFragment extends Fragment {
         }
 
         if (mUser.getUsername() == null) return;
-
-        BaseActivity.mUsersDatabaseReference.child(mUser.getUsername()).addValueEventListener(new ValueEventListener() {
+        
+        // CRITICAL: Listen to UID path
+        BaseActivity.mUsersDatabaseReference.child(mUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 UserModel user = snapshot.getValue(UserModel.class);

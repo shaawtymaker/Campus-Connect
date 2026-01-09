@@ -36,11 +36,13 @@ import com.harsh.shah.threads.clone.utils.ImageLoader;
 public class ProfileThreadsFragment extends Fragment {
 
     private static final String ARG_MODE = "mode";
+    private static final String ARG_UID = "uid";
     public static final int MODE_THREADS = 0;
     public static final int MODE_REPLIES = 1;
     public static final int MODE_REPOSTS = 2;
 
     private int mode;
+    private String targetUid;
     private RecyclerView recyclerView;
     private TextView noDataText;
     private Adapter adapter;
@@ -51,9 +53,14 @@ public class ProfileThreadsFragment extends Fragment {
     }
 
     public static ProfileThreadsFragment newInstance(int mode) {
+        return newInstance(mode, null); // Backward compatibility
+    }
+
+    public static ProfileThreadsFragment newInstance(int mode, String uid) {
         ProfileThreadsFragment fragment = new ProfileThreadsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_MODE, mode);
+        args.putString(ARG_UID, uid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,6 +70,7 @@ public class ProfileThreadsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mode = getArguments().getInt(ARG_MODE);
+            targetUid = getArguments().getString(ARG_UID);
         }
     }
 
@@ -97,16 +105,20 @@ public class ProfileThreadsFragment extends Fragment {
                     if (model != null) {
                         model.setID(dataSnapshot.getKey());
                         boolean include = false;
+                        String uidToCheck = targetUid != null ? targetUid : (BaseActivity.mUser != null ? BaseActivity.mUser.getUid() : null);
+                        
+                        if (uidToCheck == null) return; // Should not happen
+
                         switch (mode) {
                             case MODE_THREADS:
-                                if (model.getUserId() != null && model.getUserId().equals(BaseActivity.mUser.getUid())) {
+                                if (model.getUserId() != null && model.getUserId().equals(uidToCheck)) {
                                     include = true;
                                 }
                                 break;
                             case MODE_REPLIES:
                                 if (model.getComments() != null) {
                                     for (CommentsModel comment : model.getComments().values()) {
-                                        if (comment.getUserId() != null && comment.getUserId().equals(BaseActivity.mUser.getUid())) {
+                                        if (comment.getUserId() != null && comment.getUserId().equals(uidToCheck)) {
                                             include = true;
                                             break;
                                         }
@@ -114,7 +126,7 @@ public class ProfileThreadsFragment extends Fragment {
                                 }
                                 break;
                             case MODE_REPOSTS:
-                                if (model.getReposts() != null && model.getReposts().contains(BaseActivity.mUser.getUid())) {
+                                if (model.getReposts() != null && model.getReposts().contains(uidToCheck)) {
                                     include = true;
                                 }
                                 break;
@@ -248,7 +260,7 @@ public class ProfileThreadsFragment extends Fragment {
                 holder.itemView.findViewById(R.id.poll_layout).setVisibility(View.GONE);
             }
 
-            holder.itemView.setOnClickListener(view -> startActivity(new Intent(getContext(), ThreadViewActivity.class).putExtra("thread", model.getID())));
+            holder.itemView.setOnClickListener(view -> startActivity(new Intent(view.getContext(), ThreadViewActivity.class).putExtra("thread", model.getID())));
 
             holder.itemView.findViewById(R.id.likeThreadLayout).setOnClickListener(view -> {
                 if (model.getLikes() == null || BaseActivity.mUser == null) return;

@@ -211,8 +211,24 @@ public class FollowingFollowersProfilesActivity extends BaseActivity {
                 holder.profileImage.setImageResource(R.drawable.person_outline_24px);
             }
 
-            // Hide follow button (already following/followed)
-            holder.followButton.setVisibility(View.GONE);
+            holder.itemView.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(v.getContext(), com.harsh.shah.threads.clone.activities.OtherUserProfileActivity.class);
+                intent.putExtra("uid", user.getUid());
+                v.getContext().startActivity(intent);
+            });
+
+            holder.followButton.setVisibility(View.VISIBLE);
+            if (showingFollowers) {
+                holder.followButton.setText("Remove");
+                holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
+                holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
+                holder.followButton.setOnClickListener(v -> removeFollower(user));
+            } else {
+                holder.followButton.setText("Following");
+                holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
+                holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
+                holder.followButton.setOnClickListener(v -> unfollowUser(user));
+            }
         }
 
         @Override
@@ -233,6 +249,46 @@ public class FollowingFollowersProfilesActivity extends BaseActivity {
                 followButton = itemView.findViewById(R.id.followButton);
             }
         }
+    }
+
+    private void unfollowUser(UserModel targetUser) {
+        if (mUser.getFollowing() != null) {
+            mUser.getFollowing().remove(targetUser.getUid());
+        }
+        if (targetUser.getFollowers() != null) {
+            targetUser.getFollowers().remove(mUser.getUid());
+        }
+        
+        // Optimistic UI update
+        followingIds.remove(targetUser.getUid());
+        displayedUsers.remove(targetUser);
+        adapter.notifyDataSetChanged();
+        updateTabCounts();
+
+        // Update Firebase
+        mUsersDatabaseReference.child(mUser.getUsername()).setValue(mUser);
+        mUsersDatabaseReference.child(targetUser.getUsername()).setValue(targetUser)
+            .addOnFailureListener(e -> Toast.makeText(this, "Error unfollowing", Toast.LENGTH_SHORT).show());
+    }
+
+    private void removeFollower(UserModel targetUser) {
+        if (mUser.getFollowers() != null) {
+            mUser.getFollowers().remove(targetUser.getUid());
+        }
+        if (targetUser.getFollowing() != null) {
+            targetUser.getFollowing().remove(mUser.getUid());
+        }
+
+        // Optimistic UI update
+        followerIds.remove(targetUser.getUid());
+        displayedUsers.remove(targetUser);
+        adapter.notifyDataSetChanged();
+        updateTabCounts();
+        
+        // Update Firebase
+        mUsersDatabaseReference.child(mUser.getUsername()).setValue(mUser);
+        mUsersDatabaseReference.child(targetUser.getUsername()).setValue(targetUser)
+            .addOnFailureListener(e -> Toast.makeText(this, "Error removing follower", Toast.LENGTH_SHORT).show());
     }
 
     public void pressBack(View view) {

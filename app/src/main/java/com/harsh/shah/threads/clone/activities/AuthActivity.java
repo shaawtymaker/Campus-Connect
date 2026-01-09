@@ -84,7 +84,9 @@ public class AuthActivity extends BaseActivity {
                                 task.getResult().getUser().updateProfile(userProfileChangeRequest);
                                 task.getResult().getUser().reload().isSuccessful();
                                 //showProgressDialog();
-                                mUsersDatabaseReference.child(username).setValue(
+                                task.getResult().getUser().reload().isSuccessful();
+                                //showProgressDialog();
+                                mUsersDatabaseReference.child(task.getResult().getUser().getUid()).setValue(
                                         new UserModel(
                                                 new ArrayList<>(),
                                                 new ArrayList<>(),

@@ -65,6 +65,7 @@ public class BaseActivity extends AppCompatActivity {
     public static UserModel mUser;
     public static DatabaseReference mThreadsDatabaseReference;
     public static DatabaseReference mFollowRequestsDatabaseReference;
+    public static DatabaseReference mNotificationsDatabaseReference;
     public FirebaseAuth mAuth;
     public FirebaseDatabase mDatabase;
     public DatabaseReference gUsernamesDatabaseReference;
@@ -183,7 +184,8 @@ public class BaseActivity extends AppCompatActivity {
 
     public static void updateProfileInfo(UserModel user, AuthListener authListener) {
         authListener.onAuthTaskStart();
-        mUsersDatabaseReference.child(mUser.getUsername()).setValue(user).addOnCompleteListener(task -> {
+        // CRITICAL: Update using UID keys
+        mUsersDatabaseReference.child(user.getUid()).setValue(user).addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 authListener.onAuthFail(null);
             }
@@ -213,6 +215,7 @@ public class BaseActivity extends AppCompatActivity {
         mUsersDatabaseReference = mDatabase.getReference(Constants.USERS_DB_REF);
         mThreadsDatabaseReference = mDatabase.getReference(Constants.THREADS_DB_REF);
         mFollowRequestsDatabaseReference = mDatabase.getReference("FollowRequests");
+        mNotificationsDatabaseReference = mDatabase.getReference("notifications");
         gUsernamesDatabaseReference = mDatabase.getReference(Constants.USERNAMES_DB_REF);
 
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -292,7 +295,9 @@ public class BaseActivity extends AppCompatActivity {
                                             ""
                                     );
                                     
-                                    mUsersDatabaseReference.child(username).setValue(newUser).addOnCompleteListener(task1 -> {
+                                    
+                                    // CRITICAL: Update using UID keys
+                                    mUsersDatabaseReference.child(uid).setValue(newUser).addOnCompleteListener(task1 -> {
                                         hideProgressDialog();
                                         if (task1.isSuccessful()) {
                                             mUser = newUser;

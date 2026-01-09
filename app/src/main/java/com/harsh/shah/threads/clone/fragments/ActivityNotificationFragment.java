@@ -256,6 +256,12 @@ public class ActivityNotificationFragment extends Fragment {
                             }
                             
                             // Check follow status
+                            holder.itemView.setOnClickListener(v -> {
+                                android.content.Intent intent = new android.content.Intent(v.getContext(), com.harsh.shah.threads.clone.activities.OtherUserProfileActivity.class);
+                                intent.putExtra("uid", user.getUid());
+                                v.getContext().startActivity(intent);
+                            });
+                            
                             if (BaseActivity.mUser != null && BaseActivity.mUser.getFollowing() != null && BaseActivity.mUser.getFollowing().contains(user.getUid())) {
                                 holder.followButton.setText("Following");
                                 holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
@@ -276,9 +282,21 @@ public class ActivityNotificationFragment extends Fragment {
                                     BaseActivity.mUser.getFollowing().add(user.getUid());
                                     if (user.getFollowers() == null) user.setFollowers(new ArrayList<>());
                                     user.getFollowers().add(BaseActivity.mUser.getUid());
+
+                                    // Send notification
+                                    String notificationId = BaseActivity.mNotificationsDatabaseReference.push().getKey();
+                                    com.harsh.shah.threads.clone.model.NotificationModel notification = new com.harsh.shah.threads.clone.model.NotificationModel(
+                                        notificationId,
+                                        "FOLLOW",
+                                        BaseActivity.mUser.getUid(),
+                                        com.harsh.shah.threads.clone.utils.Utils.getNowInMillis() + "",
+                                        "",
+                                        "started following you"
+                                    );
+                                    BaseActivity.mNotificationsDatabaseReference.child(user.getUid()).child(notificationId).setValue(notification);
                                 }
-                                BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid()).setValue(BaseActivity.mUser);
-                                BaseActivity.mUsersDatabaseReference.child(user.getUid()).setValue(user);
+                                BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUsername()).setValue(BaseActivity.mUser);
+                                BaseActivity.mUsersDatabaseReference.child(user.getUsername()).setValue(user);
                                 notifyItemChanged(holder.getAdapterPosition());
                             });
                         }
