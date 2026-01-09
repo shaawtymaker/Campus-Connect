@@ -216,4 +216,16 @@ public class UserModel {
         return fcmToken;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserModel userModel = (UserModel) o;
+        return uid != null ? uid.equals(userModel.uid) : userModel.uid == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return uid != null ? uid.hashCode() : 0;
+    }
 }

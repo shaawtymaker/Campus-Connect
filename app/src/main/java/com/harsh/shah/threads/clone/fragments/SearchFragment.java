@@ -93,12 +93,23 @@ public class SearchFragment extends Fragment {
                 allUsers.clear();
                 String currentUid = BaseActivity.mUser != null ? BaseActivity.mUser.getUid() : null;
                 
+                java.util.Set<String> addedUids = new java.util.HashSet<>();
+                
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     UserModel user = dataSnapshot.getValue(UserModel.class);
                     if (user != null) {
                         // Only filter out the current user if we know who it is
                         if (currentUid == null || !user.getUid().equals(currentUid)) {
-                            allUsers.add(user);
+                            // Deduplication logic: Check if UID already added
+                            if (user.getUid() != null && !addedUids.contains(user.getUid())) {
+                                allUsers.add(user);
+                                addedUids.add(user.getUid());
+                            } else if (user.getUid() == null) {
+                                // Fallback for legacy users without UID (though they shouldn't exist ideally)
+                                if (!allUsers.contains(user)) {
+                                     allUsers.add(user);
+                                }
+                            }
                         }
                     }
                 }
