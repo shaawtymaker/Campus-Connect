@@ -146,6 +146,7 @@ public class HomeFragment extends Fragment {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ThreadModel threadModel = snapshot.getValue(ThreadModel.class);
                 if (threadModel != null) {
+                    threadModel.setID(snapshot.getKey());
                     dataAdapter.addData(threadModel);
                     // Track the key of the first thread for pagination
                     if (lastLoadedKey == null || snapshot.getKey().compareTo(lastLoadedKey) < 0) {
@@ -158,6 +159,7 @@ public class HomeFragment extends Fragment {
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 ThreadModel model = snapshot.getValue(ThreadModel.class);
                 if (model != null) {
+                    model.setID(snapshot.getKey());
                     for (int i = 0; i < data.size(); i++) {
                         if (data.get(i).getID().equals(model.getID())) {
                             dataAdapter.updateData(i, model);
@@ -327,7 +329,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
+    public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         private ArrayList<ThreadModel> data = new ArrayList<>();
 
         public Adapter(ArrayList<ThreadModel> data) {
@@ -414,18 +416,81 @@ public class HomeFragment extends Fragment {
 
             holder.itemView.setOnClickListener(view -> startActivity(new Intent(getContext(), ThreadViewActivity.class).putExtra("thread", model.getID())));
 
-            // --- SAFE VOTING LOGIC (Only works if user logged in) ---
-            if (model.getPollOptions() != null && BaseActivity.mUser != null) {
-                // ... (Click Listeners for Polls would go here, ensure mUser is checked inside them too)
-
-                if (model.getPollOptions().getOption1() != null && model.getPollOptions().getOption1().getVotes().contains(BaseActivity.mUser.getUid()))
-                    setHeaderPos((TextView) holder.itemView.findViewById(R.id.poll_option_1), true);
-                else if (model.getPollOptions().getOption2() != null && model.getPollOptions().getOption2().getVotes().contains(BaseActivity.mUser.getUid()))
-                    setHeaderPos((TextView) holder.itemView.findViewById(R.id.poll_option_2), true);
-                else if (model.getPollOptions().getOption3() != null && model.getPollOptions().getOption3().getVotes().contains(BaseActivity.mUser.getUid()))
-                    setHeaderPos((TextView) holder.itemView.findViewById(R.id.poll_option_3), true);
-                else if (model.getPollOptions().getOption4() != null && model.getPollOptions().getOption4().getVotes().contains(BaseActivity.mUser.getUid()))
-                    setHeaderPos((TextView) holder.itemView.findViewById(R.id.poll_option_4), true);
+            // Poll voting logic - Set up click listeners for each poll option
+            if (model.isIsPoll() && model.getPollOptions() != null && BaseActivity.mUser != null) {
+                String userId = BaseActivity.mUser.getUid();
+                
+                // Check if user has already voted
+                boolean hasVoted = false;
+                if (model.getPollOptions().getOption1() != null && model.getPollOptions().getOption1().getVotes().contains(userId)) hasVoted = true;
+                if (model.getPollOptions().getOption2() != null && model.getPollOptions().getOption2().getVotes().contains(userId)) hasVoted = true;
+                if (model.getPollOptions().getOption3() != null && model.getPollOptions().getOption3().getVotes().contains(userId)) hasVoted = true;
+                if (model.getPollOptions().getOption4() != null && model.getPollOptions().getOption4().getVotes().contains(userId)) hasVoted = true;
+                
+                // Poll Option 1 Click
+                TextView pollOption1 = holder.itemView.findViewById(R.id.poll_option_1);
+                if (model.getPollOptions().getOption1() != null && model.getPollOptions().getOption1().getVisibility()) {
+                    boolean isVoted = model.getPollOptions().getOption1().getVotes().contains(userId);
+                    setHeaderPos(pollOption1, isVoted);
+                    
+                    pollOption1.setOnClickListener(v -> {
+                        if (!isVoted) {
+                            votePoll(model, 1, newPosition);
+                        }
+                    });
+                }
+                
+                // Poll Option 2 Click
+                TextView pollOption2 = holder.itemView.findViewById(R.id.poll_option_2);
+                if (model.getPollOptions().getOption2() != null && model.getPollOptions().getOption2().getVisibility()) {
+                    boolean isVoted = model.getPollOptions().getOption2().getVotes().contains(userId);
+                    setHeaderPos(pollOption2, isVoted);
+                    
+                    pollOption2.setOnClickListener(v -> {
+                        if (!isVoted) {
+                            votePoll(model, 2, newPosition);
+                        }
+                    });
+                }
+                
+                // Poll Option 3 Click
+                TextView pollOption3 = holder.itemView.findViewById(R.id.poll_option_3);
+                if (model.getPollOptions().getOption3() != null && model.getPollOptions().getOption3().getVisibility()) {
+                    boolean isVoted = model.getPollOptions().getOption3().getVotes().contains(userId);
+                    setHeaderPos(pollOption3, isVoted);
+                    
+                    pollOption3.setOnClickListener(v -> {
+                        if (!isVoted) {
+                            votePoll(model, 3, newPosition);
+                        }
+                    });
+                }
+                
+                // Poll Option 4 Click
+                TextView pollOption4 = holder.itemView.findViewById(R.id.poll_option_4);
+                if (model.getPollOptions().getOption4() != null && model.getPollOptions().getOption4().getVisibility()) {
+                    boolean isVoted = model.getPollOptions().getOption4().getVotes().contains(userId);
+                    setHeaderPos(pollOption4, isVoted);
+                    
+                    pollOption4.setOnClickListener(v -> {
+                        if (!isVoted) {
+                            votePoll(model, 4, newPosition);
+                        }
+                    });
+                }
+            }
+            
+            // Bookmark button click listener
+            ImageView bookmarkIcon = holder.itemView.findViewById(R.id.bookmarkImage);
+            if (BaseActivity.mUser != null && model.getID() != null) {
+                // Set initial bookmark state
+                boolean isSaved = BaseActivity.mUser.getSavedThreads() != null && 
+                                  BaseActivity.mUser.getSavedThreads().contains(model.getID());
+                updateBookmarkIcon(bookmarkIcon, isSaved);
+                
+                bookmarkIcon.setOnClickListener(v -> {
+                    toggleSaveThread(model, bookmarkIcon);
+                });
             }
 
             holder.itemView.findViewById(R.id.likeThreadLayout).setOnClickListener(view -> {
@@ -477,6 +542,68 @@ public class HomeFragment extends Fragment {
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
             }
+        }
+        
+        // Handle poll voting
+        private void votePoll(ThreadModel thread, int optionNumber, int position) {
+            if (thread == null || thread.getPollOptions() == null || BaseActivity.mUser == null) {
+                return;
+            }
+            
+            String userId = BaseActivity.mUser.getUid();
+            
+            // Check if user already voted on any option (prevent multiple votes)
+            boolean alreadyVoted = false;
+            if (thread.getPollOptions().getOption1() != null && thread.getPollOptions().getOption1().getVotes().contains(userId)) alreadyVoted = true;
+            if (thread.getPollOptions().getOption2() != null && thread.getPollOptions().getOption2().getVotes().contains(userId)) alreadyVoted = true;
+            if (thread.getPollOptions().getOption3() != null && thread.getPollOptions().getOption3().getVotes().contains(userId)) alreadyVoted = true;
+            if (thread.getPollOptions().getOption4() != null && thread.getPollOptions().getOption4().getVotes().contains(userId)) alreadyVoted = true;
+            
+            if (alreadyVoted) {
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "You've already voted on this poll", android.widget.Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            
+            // Add vote to selected option
+            switch (optionNumber) {
+                case 1:
+                    if (thread.getPollOptions().getOption1() != null) {
+                        thread.getPollOptions().getOption1().getVotes().add(userId);
+                    }
+                    break;
+                case 2:
+                    if (thread.getPollOptions().getOption2() != null) {
+                        thread.getPollOptions().getOption2().getVotes().add(userId);
+                    }
+                    break;
+                case 3:
+                    if (thread.getPollOptions().getOption3() != null) {
+                        thread.getPollOptions().getOption3().getVotes().add(userId);
+                    }
+                    break;
+                case 4:
+                    if (thread.getPollOptions().getOption4() != null) {
+                        thread.getPollOptions().getOption4().getVotes().add(userId);
+                    }
+                    break;
+            }
+            
+            // Update in Firebase
+            BaseActivity.mThreadsDatabaseReference.child(thread.getID()).setValue(thread)
+                .addOnSuccessListener(aVoid -> {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Vote recorded!", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                    // Update UI
+                    notifyItemChanged(position + 1);
+                })
+                .addOnFailureListener(e -> {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Failed to record vote", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
         }
 
         private void updateVote(String id, ThreadModel dataModel) {
@@ -621,7 +748,13 @@ public class HomeFragment extends Fragment {
         
         // Handle simple repost
         private void handleSimpleRepost(ThreadModel thread) {
-            if (BaseActivity.mUser == null || thread == null) return;
+            if (BaseActivity.mUser == null || thread == null || thread.getID() == null || thread.getID().isEmpty()) {
+                if (getContext() != null) {
+                    String error = BaseActivity.mUser == null ? "User not logged in" : "Error: Thread ID is missing";
+                    android.widget.Toast.makeText(getContext(), error, android.widget.Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
             
             String userId = BaseActivity.mUser.getUid();
             
@@ -642,6 +775,54 @@ public class HomeFragment extends Fragment {
             // Update in Firebase
             BaseActivity.mThreadsDatabaseReference.child(thread.getID()).setValue(thread);
             notifyDataSetChanged();
+        }
+        
+        // Toggle save/unsave thread
+        private void toggleSaveThread(ThreadModel thread, ImageView bookmarkIcon) {
+            if (BaseActivity.mUser == null || thread == null || thread.getID() == null) {
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Error saving thread", android.widget.Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            
+            if (BaseActivity.mUser.getSavedThreads() == null) {
+                BaseActivity.mUser.setSavedThreads(new ArrayList<>());
+            }
+            
+            boolean isSaved = BaseActivity.mUser.getSavedThreads().contains(thread.getID());
+            
+            if (isSaved) {
+                // Unsave
+                BaseActivity.mUser.getSavedThreads().remove(thread.getID());
+                updateBookmarkIcon(bookmarkIcon, false);
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Removed from saved", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Save
+                BaseActivity.mUser.getSavedThreads().add(thread.getID());
+                updateBookmarkIcon(bookmarkIcon, true);
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Thread saved!", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+            
+            // Update in Firebase
+            BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid())
+                .child("savedThreads")
+                .setValue(BaseActivity.mUser.getSavedThreads());
+        }
+        
+        // Update bookmark icon based on save state
+        private void updateBookmarkIcon(ImageView icon, boolean isSaved) {
+            if (isSaved) {
+                icon.setImageResource(R.drawable.favorite_24px); // Use filled icon as bookmark
+                icon.setColorFilter(getResources().getColor(R.color.blue));
+            } else {
+                icon.setImageResource(R.drawable.add_24px); // Use outline icon
+                icon.setColorFilter(getResources().getColor(R.color.textSec));
+            }
         }
     }
 }

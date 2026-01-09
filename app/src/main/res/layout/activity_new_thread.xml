@@ -239,9 +239,7 @@
             app:layout_constraintEnd_toStartOf="@+id/insertHashtag"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/insertImage"
-            app:tint="@color/textSec"
-            android:visibility="gone"
-            tools:visibility="visible"/>
+            app:tint="@color/textSec"/>
 
         <ImageView
             android:id="@+id/insertHashtag"
@@ -264,9 +262,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/insertHashtag"
-            app:tint="@color/textSec"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            app:tint="@color/textSec" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -3,34 +3,20 @@ package com.harsh.shah.threads.clone.database;
 import android.content.Context;
 import android.util.Log;
 
-import com.harsh.shah.threads.clone.Constants;
-import com.harsh.shah.threads.clone.interfaces.profile.onProfileUpdate;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import io.appwrite.Client;
-import io.appwrite.coroutines.CoroutineCallback;
-import io.appwrite.models.InputFile;
-import io.appwrite.services.Storage;
-import io.github.techgnious.IVCompressor;
-import io.github.techgnious.dto.ImageFormats;
-import io.github.techgnious.dto.ResizeResolution;
-import io.github.techgnious.exception.ImageException;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class StorageHelper {
 
     private static final String TAG = "StorageHelper";
+    private static final String STORAGE_PATH = "thread_images";
 
     private static StorageHelper instance;
-    private final Storage storage;
+    private final FirebaseStorage storage;
 
     private StorageHelper(Context context) {
-        Client client = new Client(context,"https://cloud.appwrite.io/v1");
-        client.setProject(Constants.APPWRITE_PROJECT_ID);
-        storage = new Storage(client);
+        storage = FirebaseStorage.getInstance();
     }
 
     public static StorageHelper getInstance(Context context) {
@@ -40,44 +26,57 @@ public class StorageHelper {
         return instance;
     }
 
-    public void uploadFile(File file, String id) {
-        storage.createFile(
-                Constants.APPWRITE_STORAGE_BUCKET_ID,
-                id,
-                InputFile.Companion.fromPath(file.getPath()),
-                new CoroutineCallback<>((result, error) -> {
-                    if (error != null) {
-                        //error.printStackTrace();
-                        Log.e(TAG, "StorageHelper: ", error);
-                        return;
-                    }
+    public interface UploadCallback {
+        void onSuccess(String downloadUrl);
+        void onFailure(Exception e);
+    }
 
-                    Log.d(TAG, result.toString());
-                }));
+    public void uploadFile(byte[] bytes, String fileName, String id, UploadCallback callback) {
+        try {
+            // Create reference to image location
+            StorageReference imageRef = storage.getReference()
+                    .child(STORAGE_PATH)
+                    .child(id + ".jpg");
+
+            Log.d(TAG, "Attempting upload: " + fileName + " (ID: " + id + ")");
+            Log.d(TAG, "Storage path: " + STORAGE_PATH + "/" + id + ".jpg");
+
+            // Upload the file
+            UploadTask uploadTask = imageRef.putBytes(bytes);
+            
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                // Get download URL after successful upload
+                imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String downloadUrl = uri.toString();
+                    Log.d(TAG, "Upload success: " + downloadUrl);
+                    if (callback != null) callback.onSuccess(downloadUrl);
+                }).addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to get download URL: ", e);
+                    if (callback != null) callback.onFailure(e);
+                });
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "Upload failed: ", e);
+                Log.e(TAG, "Error details: " + e.getMessage());
+                if (callback != null) callback.onFailure(e);
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception during upload setup: ", e);
+            if (callback != null) callback.onFailure(e);
+        }
     }
 
     public void deleteFile(String id) {
-        storage.deleteFile(Constants.APPWRITE_STORAGE_BUCKET_ID, id, new CoroutineCallback<>((result, error)->{
-            if (error != null) {
-                //error.printStackTrace();
-                Log.e(TAG, "StorageHelper: ", error);
-                return;
-            }
-
-            Log.d(TAG, result.toString());
-        }));
+        StorageReference imageRef = storage.getReference()
+                .child(STORAGE_PATH)
+                .child(id + ".jpg");
+        
+        imageRef.delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Delete success: " + id);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Delete failed: ", e);
+                });
     }
-
-    public void downloadFile(String id){
-        storage.getFileDownload(Constants.APPWRITE_STORAGE_BUCKET_ID, id, new CoroutineCallback<>((result, error)->{
-            if (error != null) {
-                //error.printStackTrace();
-                Log.e(TAG, "StorageHelper: ", error);
-                return;
-            }
-
-            Log.d(TAG, result.toString());
-        }));
-    }
-
 }

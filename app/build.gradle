@@ -52,6 +52,7 @@ dependencies {
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.auth
     implementation libs.firebase.database
+    implementation libs.firebase.storage
     implementation libs.firebase.play.service.auth
     implementation libs.google.auth.library.oauth2.http
     implementation libs.swipe.refresh.layout
@@ -60,7 +61,7 @@ dependencies {
     implementation libs.glide
     implementation(libs.photoview.dialog)
 
-    implementation(libs.sdk.for.android)
+
     implementation libs.ivcompressor
     implementation libs.jave.all.deps
 

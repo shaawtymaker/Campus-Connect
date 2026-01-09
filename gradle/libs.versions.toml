@@ -17,7 +17,7 @@ firebaseBom = "33.5.1"
 firebasePlayServiceAuth = "21.2.0"
 photoviewDialog = "1.0.2"
 picasso = "2.71828"
-sdkForAndroid = "6.0.0"
+
 swipeRefreshLayout = "1.2.0-alpha01"
 switchButton = "0.0.3"
 firebaseMessaging = "24.0.3"
@@ -37,11 +37,12 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-play-service-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "firebasePlayServiceAuth" }
 photoview-dialog = { module = "io.getstream:photoview-dialog", version.ref = "photoviewDialog" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
-sdk-for-android = { module = "io.appwrite:sdk-for-android", version.ref = "sdkForAndroid" }
+
 swipe-refresh-layout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", name = "swipe-refresh-layout", version.ref = "swipeRefreshLayout" }
 switch-button = { module = "com.github.zcweng:switch-button", version.ref = "switchButton" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }

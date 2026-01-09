@@ -122,6 +122,9 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.lockImage).setOnClickListener(v-> startActivity(new Intent(getContext(), PrivacyActivity.class)));
+        
+        view.findViewById(R.id.saved_threads_button).setOnClickListener(v -> 
+            startActivity(new Intent(getContext(), com.harsh.shah.threads.clone.activities.SavedThreadsActivity.class)));
 
         View.OnClickListener listener = v -> startActivity(new Intent(getContext(), FollowingFollowersProfilesActivity.class));
         view.findViewById(R.id.followers).setOnClickListener(listener);

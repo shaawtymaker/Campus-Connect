@@ -94,6 +94,7 @@ public class ProfileThreadsFragment extends Fragment {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     ThreadModel model = dataSnapshot.getValue(ThreadModel.class);
                     if (model != null) {
+                        model.setID(dataSnapshot.getKey());
                         boolean include = false;
                         switch (mode) {
                             case MODE_THREADS:

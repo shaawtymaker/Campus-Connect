@@ -91,10 +91,15 @@ public class SearchFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 allUsers.clear();
+                String currentUid = BaseActivity.mUser != null ? BaseActivity.mUser.getUid() : null;
+                
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     UserModel user = dataSnapshot.getValue(UserModel.class);
-                    if (user != null && BaseActivity.mUser != null && !user.getUid().equals(BaseActivity.mUser.getUid())) {
-                        allUsers.add(user);
+                    if (user != null) {
+                        // Only filter out the current user if we know who it is
+                        if (currentUid == null || !user.getUid().equals(currentUid)) {
+                            allUsers.add(user);
+                        }
                     }
                 }
                 filter(searchEditText.getText().toString());
@@ -263,48 +268,117 @@ public class SearchFragment extends Fragment {
             }
 
             holder.followButton.setOnClickListener(v -> {
-                if (BaseActivity.mUser == null) return;
+                if (BaseActivity.mUser == null) {
+                    ((BaseActivity) getActivity()).showToast("Loading user profile, please wait...");
+                    return;
+                }
                 
                 String buttonText = holder.followButton.getText().toString();
                 
                 if (buttonText.equals("Following")) {
-                    // Unfollow
-                    BaseActivity.mUser.getFollowing().remove(user.getUid());
-                    if (user.getFollowers() != null) user.getFollowers().remove(BaseActivity.mUser.getUid());
-                    
-                    BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid()).setValue(BaseActivity.mUser);
-                    BaseActivity.mUsersDatabaseReference.child(user.getUid()).setValue(user);
-                    
-                    holder.followButton.setText("Follow");
-                    holder.followButton.setBackgroundResource(R.drawable.button_background);
-                    holder.followButton.setTextColor(getResources().getColor(R.color.textMain));
+                    // Unfollow - Fetch target user from Firebase first to ensure we have latest data
+                    BaseActivity.mUsersDatabaseReference.orderByChild("uid").equalTo(user.getUid())
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                        UserModel targetUser = userSnapshot.getValue(UserModel.class);
+                                        if (targetUser != null) {
+                                            // Remove from current user's following list
+                                            if (BaseActivity.mUser.getFollowing() != null) {
+                                                BaseActivity.mUser.getFollowing().remove(targetUser.getUid());
+                                            }
+                                            
+                                            // Remove from target user's followers list
+                                            if (targetUser.getFollowers() != null) {
+                                                targetUser.getFollowers().remove(BaseActivity.mUser.getUid());
+                                            }
+                                            
+                                            // Update both users in Firebase using their username as key
+                                            if (BaseActivity.mUser.getUsername() != null && targetUser.getUsername() != null) {
+                                                BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUsername())
+                                                    .setValue(BaseActivity.mUser);
+                                                BaseActivity.mUsersDatabaseReference.child(targetUser.getUsername())
+                                                    .setValue(targetUser);
+                                                
+                                                // Update UI
+                                                holder.followButton.setText("Follow");
+                                                holder.followButton.setBackgroundResource(R.drawable.button_background);
+                                                holder.followButton.setTextColor(getResources().getColor(R.color.textMain));
+                                                
+                                                ((BaseActivity) getActivity()).showToast("Unfollowed " + targetUser.getUsername());
+                                            } else {
+                                                ((BaseActivity) getActivity()).showToast("Error update: username missing");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                ((BaseActivity) getActivity()).showToast("Error unfollowing user");
+                            }
+                        });
                 } else if (buttonText.equals("Requested")) {
-                    // FIX: Cancel pending request
+                    // Cancel pending request
                     cancelFollowRequest(user.getUid(), holder.followButton);
                 } else { // "Follow"
-                    // FIX: Check if account is private
+                    // Check if account is private
                     if (!user.isPublicAccount()) {
-                        // FIX: Check if request already exists before sending
+                        // Send follow request for private accounts
                         checkAndSendFollowRequest(user, holder.followButton, position);
                     } else {
-                        // Public account - direct follow
-                        if (BaseActivity.mUser.getFollowing() == null) BaseActivity.mUser.setFollowing(new ArrayList<>());
-                        
-                        // FIX: Check if not already following
-                        if (!BaseActivity.mUser.getFollowing().contains(user.getUid())) {
-                            BaseActivity.mUser.getFollowing().add(user.getUid());
-                            
-                            if (user.getFollowers() == null) user.setFollowers(new ArrayList<>());
-                            user.getFollowers().add(BaseActivity.mUser.getUid());
-                            
-                            // Update Firebase
-                            BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUid()).setValue(BaseActivity.mUser);
-                            BaseActivity.mUsersDatabaseReference.child(user.getUid()).setValue(user);
-                            
-                            holder.followButton.setText("Following");
-                            holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
-                            holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
-                        }
+                        // Public account - direct follow - Fetch target user from Firebase first
+                        BaseActivity.mUsersDatabaseReference.orderByChild("uid").equalTo(user.getUid())
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.exists()) {
+                                        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                            UserModel targetUser = userSnapshot.getValue(UserModel.class);
+                                            if (targetUser != null) {
+                                                // Initialize lists if null
+                                                if (BaseActivity.mUser.getFollowing() == null) {
+                                                    BaseActivity.mUser.setFollowing(new ArrayList<>());
+                                                }
+                                                if (targetUser.getFollowers() == null) {
+                                                    targetUser.setFollowers(new ArrayList<>());
+                                                }
+                                                
+                                                // Check if not already following
+                                                if (!BaseActivity.mUser.getFollowing().contains(targetUser.getUid())) {
+                                                    BaseActivity.mUser.getFollowing().add(targetUser.getUid());
+                                                    targetUser.getFollowers().add(BaseActivity.mUser.getUid());
+                                                    
+                                                    // Update both users in Firebase using their username as key
+                                                    if (BaseActivity.mUser.getUsername() != null && targetUser.getUsername() != null) {
+                                                        BaseActivity.mUsersDatabaseReference.child(BaseActivity.mUser.getUsername())
+                                                            .setValue(BaseActivity.mUser);
+                                                        BaseActivity.mUsersDatabaseReference.child(targetUser.getUsername())
+                                                            .setValue(targetUser);
+                                                        
+                                                        // Update UI
+                                                        holder.followButton.setText("Following");
+                                                        holder.followButton.setBackgroundResource(R.drawable.button_background_outlined);
+                                                        holder.followButton.setTextColor(getResources().getColor(R.color.textSec));
+                                                        
+                                                        ((BaseActivity) getActivity()).showToast("Following " + targetUser.getUsername());
+                                                    } else {
+                                                        ((BaseActivity) getActivity()).showToast("Error follow: username missing");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    ((BaseActivity) getActivity()).showToast("Error following user");
+                                }
+                            });
                     }
                 }
             });

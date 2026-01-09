@@ -97,6 +97,8 @@ public class BaseActivity extends AppCompatActivity {
         }
     };
 
+    private ValueEventListener currentUserListener;
+
     public void fetchCurrentUser(OnUserLoadedListener listener) {
         fetchCurrentUser(false, listener);
     }
@@ -111,44 +113,49 @@ public class BaseActivity extends AppCompatActivity {
         Log.d(TAG, "fetchCurrentUser: Fetching for UID " + currentUid + ", forceRefresh=" + forceRefresh);
         Log.d(TAG, "fetchCurrentUser: Database path: " + mUsersDatabaseReference.toString());
         
-        // If we already have the user and not forcing refresh, return it immediately
-        if (!forceRefresh && mUser != null && mUser.getUid().equals(currentUid)) {
+        // If we already have the user and not forcing refresh, and we have a listener, return cache
+        if (!forceRefresh && mUser != null && mUser.getUid().equals(currentUid) && currentUserListener != null) {
             Log.d(TAG, "fetchCurrentUser: User already loaded in memory (using cache)");
             if (listener != null) listener.onUserLoaded(mUser);
             return;
         }
 
-        // Query users by UID since keys are usernames
-        Log.d(TAG, "fetchCurrentUser: Starting Firebase query orderByChild('uid').equalTo('" + currentUid + "')");
-        mUsersDatabaseReference.orderByChild("uid").equalTo(currentUid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Log.d(TAG, "fetchCurrentUser: onDataChange called, exists=" + snapshot.exists() + ", childrenCount=" + snapshot.getChildrenCount());
-                        if (snapshot.exists()) {
-                            for (DataSnapshot child : snapshot.getChildren()) {
-                                Log.d(TAG, "fetchCurrentUser: Processing child key: " + child.getKey());
-                                mUser = child.getValue(UserModel.class);
-                                if (mUser != null) {
-                                    Log.d(TAG, "fetchCurrentUser: User found: " + mUser.getUsername() + " (UID: " + mUser.getUid() + ")");
-                                    if (listener != null) listener.onUserLoaded(mUser);
-                                    return; // Found the user
-                                } else {
-                                    Log.e(TAG, "fetchCurrentUser: Failed to parse UserModel from snapshot");
-                                }
-                            }
-                        }
-                        Log.w(TAG, "fetchCurrentUser: User NOT found in database for UID: " + currentUid);
-                        // User not found
-                        if (listener != null) listener.onUserLoaded(null);
-                    }
+        // Remove old listener if exists
+        if (currentUserListener != null) {
+            mUsersDatabaseReference.removeEventListener(currentUserListener);
+        }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "fetchCurrentUser: Database error - " + error.getMessage() + " (Code: " + error.getCode() + ")");
-                        if (listener != null) listener.onUserLoaded(null);
+        // Query users by UID and attach a persistent listener
+        Log.d(TAG, "fetchCurrentUser: Starting persistent Firebase query for UID " + currentUid);
+        currentUserListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d(TAG, "fetchCurrentUser onDataChange: exists=" + snapshot.exists());
+                if (snapshot.exists()) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        mUser = child.getValue(UserModel.class);
+                        if (mUser != null) {
+                            Log.d(TAG, "fetchCurrentUser: mUser updated: " + mUser.getUsername());
+                            if (listener != null) listener.onUserLoaded(mUser);
+                            // We found the user, but we don't break because we want to keep the listener attached
+                            // to the parent query or we could listen to the specific child directly.
+                            // However, since we use orderByChild, the listener is on the query.
+                             return;
+                        }
                     }
-                });
+                }
+                Log.w(TAG, "fetchCurrentUser: User record not found for UID: " + currentUid);
+                if (listener != null) listener.onUserLoaded(null);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "fetchCurrentUser: onCancelled - " + error.getMessage());
+                if (listener != null) listener.onUserLoaded(null);
+            }
+        };
+
+        mUsersDatabaseReference.orderByChild("uid").equalTo(currentUid).addValueEventListener(currentUserListener);
     }
 
     public interface OnUserLoadedListener {
@@ -214,8 +221,8 @@ public class BaseActivity extends AppCompatActivity {
                 .build();
         googleSignInClient = GoogleSignIn.getClient(BaseActivity.this, googleSignInOptions);
 
-        if (isUserLoggedIn()) {
-            //mUsersDatabaseReference.addValueEventListener(usersValueEventListener);
+        if (isUserLoggedIn() && mUser == null) {
+            fetchCurrentUser(null);
         }
 
     }
@@ -323,6 +330,10 @@ public class BaseActivity extends AppCompatActivity {
 
     public void logoutUser() {
         // CRITICAL: Clear cached user data before signout
+        if (currentUserListener != null) {
+            mUsersDatabaseReference.removeEventListener(currentUserListener);
+            currentUserListener = null;
+        }
         mUser = null;
         
         mAuth.signOut();

@@ -205,6 +205,9 @@ public class ThreadModel implements Parcelable {
     }
 
     public List<String> getReposts() {
+        if (reposts == null) {
+            reposts = new ArrayList<>();
+        }
         return reposts;
     }
 

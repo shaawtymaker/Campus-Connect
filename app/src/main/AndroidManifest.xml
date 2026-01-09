@@ -29,6 +29,9 @@
             android:name=".activities.FollowRequestsActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.SavedThreadsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.NewThreadActivity"
             android:exported="false" />
         <activity

@@ -114,9 +114,9 @@ public class FollowRequestsActivity extends BaseActivity {
             Log.d(TAG, "Requester already in followers list");
         }
         
-        // FIX: Update current user in Firebase using UID, not username
+        // FIX: Update current user in Firebase using username (key), not UID
         Log.d(TAG, "Updating current user in Firebase...");
-        mUsersDatabaseReference.child(mUser.getUid()).setValue(mUser)
+        mUsersDatabaseReference.child(mUser.getUsername()).setValue(mUser)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "✓ Current user updated successfully in Firebase");
                     // Only proceed to update requester after current user is updated
@@ -136,8 +136,8 @@ public class FollowRequestsActivity extends BaseActivity {
     private void updateRequesterFollowingList(FollowRequestModel request) {
         Log.d(TAG, "Fetching requester from Firebase...");
         // Add current user to requester's following list
-        // FIX: Use UID instead of username
-        mUsersDatabaseReference.child(request.getRequesterId())
+        // FIX: Use query to find requester by UID, then use their username as key for update
+        mUsersDatabaseReference.orderByChild("uid").equalTo(request.getRequesterId())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -152,9 +152,9 @@ public class FollowRequestsActivity extends BaseActivity {
                             } else {
                                 Log.d(TAG, "Current user already in requester's following");
                             }
-                            // FIX: Use UID instead of username
+                            // FIX: Use username as key for update
                             Log.d(TAG, "Updating requester in Firebase...");
-                            mUsersDatabaseReference.child(request.getRequesterId()).setValue(requester)
+                            mUsersDatabaseReference.child(requester.getUsername()).setValue(requester)
                                     .addOnSuccessListener(aVoid -> {
                                         Log.d(TAG, "✓ Requester updated successfully in Firebase");
                                         // SUCCESS: Both updates complete, now remove the request

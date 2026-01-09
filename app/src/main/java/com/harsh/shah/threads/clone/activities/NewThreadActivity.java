@@ -36,7 +36,10 @@ import com.harsh.shah.threads.clone.utils.MDialogUtil;
 import com.harsh.shah.threads.clone.utils.TextFormatter;
 import com.harsh.shah.threads.clone.utils.Utils;
 
+import com.harsh.shah.threads.clone.database.StorageHelper;
 import java.util.ArrayList;
+import java.io.InputStream;
+import java.util.UUID;
 
 public class NewThreadActivity extends BaseActivity {
 
@@ -55,6 +58,18 @@ public class NewThreadActivity extends BaseActivity {
             for (Uri uri : o) {
                 if (data.size() < 6) {
                     if (uri.getPath() == null) continue;
+                    
+                    // Take persistent URI permission to avoid SecurityException
+                    try {
+                        getContentResolver().takePersistableUriPermission(
+                            uri,
+                            android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        );
+                    } catch (SecurityException e) {
+                        Log.e("NewThreadActivity", "Failed to take persistable URI permission", e);
+                        // Continue anyway - some URIs may not support it
+                    }
+                    
                     data.add(uri.toString());
                     binding.recyclerView.setAdapter(new ImagesListAdapter(data));
                 }
@@ -86,13 +101,24 @@ public class NewThreadActivity extends BaseActivity {
         });
 
         binding.insertPoll.setOnClickListener(view -> {
-            if (true) return;
-            binding.pollLayout.setVisibility(View.VISIBLE);
-            binding.constraintLayout2.setVisibility(View.GONE);
+            // Toggle poll visibility - hide images if poll is shown
+            if (binding.pollLayout.getVisibility() == View.GONE) {
+                binding.pollLayout.setVisibility(View.VISIBLE);
+                binding.constraintLayout2.setVisibility(View.GONE);
+                binding.recyclerView.setVisibility(View.GONE);
+                data.clear();
+                adapter.notifyDataSetChanged();
+            }
         });
         binding.pollRemove.setOnClickListener(view -> {
             binding.pollLayout.setVisibility(View.GONE);
             binding.constraintLayout2.setVisibility(View.VISIBLE);
+            binding.recyclerView.setVisibility(View.VISIBLE);
+            // Clear poll options
+            binding.pollOption1Edittext.setText("");
+            binding.pollOption2Edittext.setText("");
+            binding.pollOption3Edittext.setText("");
+            binding.pollOption4Edittext.setText("");
         });
 
         binding.pollOption3Edittext.addTextChangedListener(new TextWatcher() {
@@ -115,9 +141,26 @@ public class NewThreadActivity extends BaseActivity {
         });
 
         binding.postButton.setOnClickListener(view -> {
-            if (binding.edittext.getText().toString().trim().isEmpty())
-                if ((adapter.getData() == null || adapter.getData().isEmpty()))
+            // Validate: need either text, images, or poll
+            boolean hasText = !binding.edittext.getText().toString().trim().isEmpty();
+            boolean hasImages = adapter.getData() != null && !adapter.getData().isEmpty();
+            boolean hasPoll = binding.pollLayout.getVisibility() == View.VISIBLE;
+            
+            if (!hasText && !hasImages && !hasPoll) {
+                Toast.makeText(this, "Please add some content", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // If poll is visible, validate poll options
+            if (hasPoll) {
+                String option1 = binding.pollOption1Edittext.getText().toString().trim();
+                String option2 = binding.pollOption2Edittext.getText().toString().trim();
+                
+                if (option1.isEmpty() || option2.isEmpty()) {
+                    Toast.makeText(this, "Please provide at least 2 poll options", Toast.LENGTH_SHORT).show();
                     return;
+                }
+            }
 
             postThread();
         });
@@ -157,26 +200,118 @@ public class NewThreadActivity extends BaseActivity {
             return;
         }
 
+        ArrayList<String> localUris = adapter.getData();
+        if (localUris != null && !localUris.isEmpty()) {
+            // We have images to upload
+            uploadImages(localUris);
+        } else {
+            // Post text-only thread
+            saveThreadToFirebase(new ArrayList<>());
+        }
+    }
+
+    private void uploadImages(ArrayList<String> localUris) {
+        showProgressDialog();
+        ArrayList<String> remoteUrls = new ArrayList<>();
+        processUpload(localUris, 0, remoteUrls);
+    }
+
+    private void processUpload(ArrayList<String> localUris, int index, ArrayList<String> remoteUrls) {
+        if (index >= localUris.size()) {
+            // All uploads finished
+            saveThreadToFirebase(remoteUrls);
+            return;
+        }
+
+        String uriString = localUris.get(index);
+        try {
+            Uri uri = Uri.parse(uriString);
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            if (inputStream == null) {
+                processUpload(localUris, index + 1, remoteUrls);
+                return;
+            }
+
+            java.io.ByteArrayOutputStream byteBuffer = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                byteBuffer.write(buffer, 0, len);
+            }
+            byte[] bytes = byteBuffer.toByteArray();
+            inputStream.close();
+
+            String fileId = UUID.randomUUID().toString();
+            StorageHelper.getInstance(this).uploadFile(bytes, "image_" + index + ".jpg", fileId, new StorageHelper.UploadCallback() {
+                @Override
+                public void onSuccess(String viewUrl) {
+                    Log.d("NewThreadActivity", "Successfully uploaded image " + index + ": " + viewUrl);
+                    remoteUrls.add(viewUrl);
+                    processUpload(localUris, index + 1, remoteUrls);
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("NewThreadActivity", "Upload failed for image " + index, e);
+                    String errorMsg = e.getMessage() != null ? e.getMessage() : "Unknown error";
+                    runOnUiThread(() -> android.widget.Toast.makeText(NewThreadActivity.this, "Upload failed: " + errorMsg, android.widget.Toast.LENGTH_LONG).show());
+                    processUpload(localUris, index + 1, remoteUrls);
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e("NewThreadActivity", "Error processing image " + index, e);
+            processUpload(localUris, index + 1, remoteUrls);
+        }
+    }
+
+    private void saveThreadToFirebase(ArrayList<String> remoteUrls) {
         final String pid = mThreadsDatabaseReference.push().getKey();
         final String threadText = binding.edittext.getText().toString();
 
         // Parse hashtags and mentions from text
         ArrayList<String> hashtags = new ArrayList<>(TextFormatter.parseHashtags(threadText));
         ArrayList<String> mentions = new ArrayList<>(TextFormatter.parseMentions(threadText));
+        
+        // Check if poll is active and collect poll data
+        boolean isPoll = binding.pollLayout.getVisibility() == View.VISIBLE;
+        PollOptions pollOptions;
+        
+        if (isPoll) {
+            String option1Text = binding.pollOption1Edittext.getText().toString().trim();
+            String option2Text = binding.pollOption2Edittext.getText().toString().trim();
+            String option3Text = binding.pollOption3Edittext.getText().toString().trim();
+            String option4Text = binding.pollOption4Edittext.getText().toString().trim();
+            
+            PollOptions.PollOptionsItem opt1 = new PollOptions.PollOptionsItem(new ArrayList<>(), option1Text, !option1Text.isEmpty());
+            PollOptions.PollOptionsItem opt2 = new PollOptions.PollOptionsItem(new ArrayList<>(), option2Text, !option2Text.isEmpty());
+            PollOptions.PollOptionsItem opt3 = new PollOptions.PollOptionsItem(new ArrayList<>(), option3Text, !option3Text.isEmpty());
+            PollOptions.PollOptionsItem opt4 = new PollOptions.PollOptionsItem(new ArrayList<>(), option4Text, !option4Text.isEmpty());
+            
+            pollOptions = new PollOptions(opt1, opt2, opt3, opt4);
+        } else {
+            // Empty poll data
+            pollOptions = new PollOptions(
+                new PollOptions.PollOptionsItem(new ArrayList<>(), "", false),
+                new PollOptions.PollOptionsItem(new ArrayList<>(), "", false),
+                new PollOptions.PollOptionsItem(new ArrayList<>(), "", false),
+                new PollOptions.PollOptionsItem(new ArrayList<>(), "", false)
+            );
+        }
 
         ThreadModel threadModel = new ThreadModel(
-                adapter.getData(),
+                remoteUrls,
                 new HashMap<>(),
                 true,
                 false,
-                false,
+                isPoll,  // Set isPoll flag
                 new ArrayList<>(),
                 mUser.getUid(),
                 "",
                 pid,
                 threadText,
                 Utils.getNowInMillis() + "",
-                new PollOptions(new PollOptions.PollOptionsItem(new ArrayList<>(), "", false), new PollOptions.PollOptionsItem(new ArrayList<>(), "", false), new PollOptions.PollOptionsItem(new ArrayList<>(), "", false), new PollOptions.PollOptionsItem(new ArrayList<>(), "", false)),
+                pollOptions,  // Use collected poll data
                 new ArrayList<>(),
                 mUser.getProfileImage(),
                 mUser.getUsername(),
@@ -187,11 +322,15 @@ public class NewThreadActivity extends BaseActivity {
         threadModel.setHashtags(hashtags);
         threadModel.setMentions(mentions);
         
-        showProgressDialog();
+        if (remoteUrls.isEmpty()) showProgressDialog(); // Only show if not already showing from upload
+
         mThreadsDatabaseReference.child(pid).setValue(threadModel).addOnCompleteListener(task -> {
             hideProgressDialog();
             if (!task.isSuccessful()) {
                 showToast(task.getException().toString());
+            } else {
+                Log.d("NewThreadActivity", "Thread saved successfully with " + remoteUrls.size() + " remote images");
+                Toast.makeText(this, "Posted!", Toast.LENGTH_SHORT).show();
             }
             finish();
         });

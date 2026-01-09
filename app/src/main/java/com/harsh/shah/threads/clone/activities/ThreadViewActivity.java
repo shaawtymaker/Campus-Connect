@@ -98,6 +98,13 @@ public class ThreadViewActivity extends BaseActivity {
             android.util.Log.d("ThreadViewActivity", "Post button clicked!");
             postComment();
         });
+
+        // Repost button listener
+        binding.linearLayout3.setOnClickListener(v -> {
+            if (currentThreadModel != null) {
+                showRepostDialog(currentThreadModel);
+            }
+        });
     }
 
     private void addNewComment() {
@@ -250,51 +257,17 @@ public class ThreadViewActivity extends BaseActivity {
 
         binding.postRecyclerView.setAdapter(new HomeFragment.PostImagesListAdapter(threadModel.getImages(), false));
 
-        if(threadModel.isIsPoll() && false) {
+        // Enable poll display
+        if(threadModel.isIsPoll() && threadModel.getPollOptions() != null) {
             binding.pollLayout.setVisibility(View.VISIBLE);
             binding.postRecyclerView.setVisibility(View.GONE);
+            
+            // Display poll options and set up voting
+            setupPollVoting(threadModel);
         }
         else {
             binding.pollLayout.setVisibility(View.GONE);
             binding.postRecyclerView.setVisibility(View.VISIBLE);
-        }
-
-        if(threadModel.getPollOptions()!=null){
-            binding.pollOption1.setText(threadModel.getPollOptions().getOption1().getText());
-            binding.pollOption2.setText(threadModel.getPollOptions().getOption2().getText());
-            if (threadModel.getPollOptions().getOption3().getVisibility()) {
-                binding.pollOption3.setVisibility(View.VISIBLE);
-                binding.pollOption3.setText(threadModel.getPollOptions().getOption3().getText());
-            }
-            if (threadModel.getPollOptions().getOption4().getVisibility()) {
-                binding.pollOption4.setVisibility(View.VISIBLE);
-                binding.pollOption4.setText(threadModel.getPollOptions().getOption4().getText());
-            }
-
-            binding.pollOption1.setOnClickListener(view -> {
-                setHeaderPos((TextView) view, true);
-                setHeaderPos((TextView) binding.pollOption2, false);
-                setHeaderPos((TextView) binding.pollOption3, false);
-                setHeaderPos((TextView) binding.pollOption4, false);
-            });
-            binding.pollOption2.setOnClickListener(view -> {
-                setHeaderPos((TextView) view, true);
-                setHeaderPos((TextView) binding.pollOption1, false);
-                setHeaderPos((TextView) binding.pollOption3, false);
-                setHeaderPos((TextView) binding.pollOption4, false);
-            });
-            binding.pollOption3.setOnClickListener(view -> {
-                setHeaderPos((TextView) view, true);
-                setHeaderPos((TextView) binding.pollOption1, false);
-                setHeaderPos((TextView) binding.pollOption2, false);
-                setHeaderPos((TextView) binding.pollOption4, false);
-            });
-            binding.pollOption4.setOnClickListener(view -> {
-                setHeaderPos((TextView) view, true);
-                setHeaderPos((TextView) binding.pollOption1, false);
-                setHeaderPos((TextView) binding.pollOption2, false);
-                setHeaderPos((TextView) binding.pollOption3, false);
-            });
         }
 
         if(threadModel.getComments()!=null && !threadModel.getComments().isEmpty()){
@@ -347,6 +320,130 @@ public class ThreadViewActivity extends BaseActivity {
             binding.likeImage.setColorFilter(getResources().getColor(R.color.red));
         }
     }
+    
+    // Setup poll voting functionality
+    private void setupPollVoting(ThreadModel thread) {
+        if (thread.getPollOptions() == null || mUser == null) return;
+        
+        String userId = mUser.getUid();
+        
+        // Display option 1
+        if (thread.getPollOptions().getOption1() != null && thread.getPollOptions().getOption1().getVisibility()) {
+            binding.pollOption1.setText(thread.getPollOptions().getOption1().getText());
+            boolean isVoted = thread.getPollOptions().getOption1().getVotes().contains(userId);
+            setHeaderPos(binding.pollOption1, isVoted);
+            
+            binding.pollOption1.setOnClickListener(v -> {
+                if (!isVoted) {
+                    votePoll(thread, 1);
+                } else {
+                    Toast.makeText(this, "You've already voted", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        
+        // Display option 2
+        if (thread.getPollOptions().getOption2() != null && thread.getPollOptions().getOption2().getVisibility()) {
+            binding.pollOption2.setText(thread.getPollOptions().getOption2().getText());
+            boolean isVoted = thread.getPollOptions().getOption2().getVotes().contains(userId);
+            setHeaderPos(binding.pollOption2, isVoted);
+            
+            binding.pollOption2.setOnClickListener(v -> {
+                if (!isVoted) {
+                    votePoll(thread, 2);
+                } else {
+                    Toast.makeText(this, "You've already voted", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        
+        // Display option 3
+        if (thread.getPollOptions().getOption3() != null && thread.getPollOptions().getOption3().getVisibility()) {
+            binding.pollOption3.setVisibility(View.VISIBLE);
+            binding.pollOption3.setText(thread.getPollOptions().getOption3().getText());
+            boolean isVoted = thread.getPollOptions().getOption3().getVotes().contains(userId);
+            setHeaderPos(binding.pollOption3, isVoted);
+            
+            binding.pollOption3.setOnClickListener(v -> {
+                if (!isVoted) {
+                    votePoll(thread, 3);
+                } else {
+                    Toast.makeText(this, "You've already voted", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        
+        // Display option 4
+        if (thread.getPollOptions().getOption4() != null && thread.getPollOptions().getOption4().getVisibility()) {
+            binding.pollOption4.setVisibility(View.VISIBLE);
+            binding.pollOption4.setText(thread.getPollOptions().getOption4().getText());
+            boolean isVoted = thread.getPollOptions().getOption4().getVotes().contains(userId);
+            setHeaderPos(binding.pollOption4, isVoted);
+            
+            binding.pollOption4.setOnClickListener(v -> {
+                if (!isVoted) {
+                    votePoll(thread, 4);
+                } else {
+                    Toast.makeText(this, "You've already voted", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+    
+    // Handle poll voting
+    private void votePoll(ThreadModel thread, int optionNumber) {
+        if (thread == null || thread.getPollOptions() == null || mUser == null) {
+            return;
+        }
+        
+        String userId = mUser.getUid();
+        
+        // Check if user already voted on any option
+        boolean alreadyVoted = false;
+        if (thread.getPollOptions().getOption1() != null && thread.getPollOptions().getOption1().getVotes().contains(userId)) alreadyVoted = true;
+        if (thread.getPollOptions().getOption2() != null && thread.getPollOptions().getOption2().getVotes().contains(userId)) alreadyVoted = true;
+        if (thread.getPollOptions().getOption3() != null && thread.getPollOptions().getOption3().getVotes().contains(userId)) alreadyVoted = true;
+        if (thread.getPollOptions().getOption4() != null && thread.getPollOptions().getOption4().getVotes().contains(userId)) alreadyVoted = true;
+        
+        if (alreadyVoted) {
+            Toast.makeText(this, "You've already voted on this poll", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Add vote to selected option
+        switch (optionNumber) {
+            case 1:
+                if (thread.getPollOptions().getOption1() != null) {
+                    thread.getPollOptions().getOption1().getVotes().add(userId);
+                }
+                break;
+            case 2:
+                if (thread.getPollOptions().getOption2() != null) {
+                    thread.getPollOptions().getOption2().getVotes().add(userId);
+                }
+                break;
+            case 3:
+                if (thread.getPollOptions().getOption3() != null) {
+                    thread.getPollOptions().getOption3().getVotes().add(userId);
+                }
+                break;
+            case 4:
+                if (thread.getPollOptions().getOption4() != null) {
+                    thread.getPollOptions().getOption4().getVotes().add(userId);
+                }
+                break;
+        }
+        
+        // Update in Firebase
+        BaseActivity.mThreadsDatabaseReference.child(thread.getID()).setValue(thread)
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(this, "Vote recorded!", Toast.LENGTH_SHORT).show();
+                // UI will auto-update via Firebase listener
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(this, "Failed to record vote", Toast.LENGTH_SHORT).show();
+            });
+    }
 
     private void setHeaderPos(TextView view, boolean isActivated) {
         if (isActivated) {
@@ -356,6 +453,96 @@ public class ThreadViewActivity extends BaseActivity {
             view.setBackgroundResource(R.drawable.button_background_outlined);
             view.setTextColor(getResources().getColor(R.color.textSec));
         }
+    }
+
+    // Show repost dialog
+    private void showRepostDialog(ThreadModel thread) {
+        if (thread == null) return;
+        
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
+            .setView(R.layout.dialog_repost)
+            .create();
+        
+        dialog.show();
+        
+        View dialogView = dialog.findViewById(android.R.id.content);
+        if (dialogView != null) {
+            // Simple repost
+            dialogView.findViewById(R.id.simpleRepostLayout).setOnClickListener(v -> {
+                handleSimpleRepost(thread);
+                dialog.dismiss();
+            });
+            
+            // Quote repost (coming soon)
+            dialogView.findViewById(R.id.quoteRepostLayout).setOnClickListener(v -> {
+                Toast.makeText(this, "Quote repost coming soon!", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+            
+            // Cancel button
+            dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
+        }
+    }
+    
+    // Handle simple repost
+    private void handleSimpleRepost(ThreadModel thread) {
+        if (BaseActivity.mUser == null || thread == null || thread.getID() == null || thread.getID().isEmpty()) {
+            String error = BaseActivity.mUser == null ? "User not logged in" : "Error: Thread ID is missing";
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String userId = BaseActivity.mUser.getUid();
+        
+        if (thread.getReposts() == null) {
+            thread.setReposts(new ArrayList<>());
+        }
+        
+        if (thread.getReposts().contains(userId)) {
+            // Un-repost
+            thread.getReposts().remove(userId);
+            Toast.makeText(this, "Removed repost", Toast.LENGTH_SHORT).show();
+        } else {
+            // Repost
+            thread.getReposts().add(userId);
+            Toast.makeText(this, "Reposted!", Toast.LENGTH_SHORT).show();
+        }
+        
+        // Update in Firebase
+        BaseActivity.mThreadsDatabaseReference.child(thread.getID()).setValue(thread);
+    }
+    
+    // Handle comment like/unlike
+    private void handleCommentLike(CommentsModel comment, int position) {
+        if (mUser == null || comment == null) {
+            Toast.makeText(this, "Error: Unable to like comment", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String userId = mUser.getUid();
+        
+        if (comment.getLikes() == null) {
+            comment.setLikes(new ArrayList<>());
+        }
+        
+        if (comment.getLikes().contains(userId)) {
+            // Unlike
+            comment.getLikes().remove(userId);
+        } else {
+            // Like
+            comment.getLikes().add(userId);
+        }
+        
+        // Update in Firebase
+        if (currentThreadModel != null && currentThreadModel.getID() != null) {
+            mThreadsDatabaseReference.child(currentThreadModel.getID())
+                .child("comments")
+                .child(comment.getId())
+                .setValue(comment);
+        }
+        
+        // Update UI
+        binding.commentsRecyclerView.getAdapter().notifyItemChanged(position);
     }
     
     // Nested replies methods
@@ -495,6 +682,22 @@ public class ThreadViewActivity extends BaseActivity {
             
             TextView likes = holder.itemView.findViewById(R.id.likes);
             likes.setText(String.valueOf(comment.getLikes() == null?0:comment.getLikes().size()));
+            
+            // Like button UI and click handler
+            ImageView likeImage = holder.itemView.findViewById(R.id.likeImage);
+            LinearLayout likeLayout = holder.itemView.findViewById(R.id.linearLayout2);
+            
+            // Set like icon state
+            if (mUser != null && comment.getLikes() != null && comment.getLikes().contains(mUser.getUid())) {
+                likeImage.setImageResource(R.drawable.favorite_24px);
+                likeImage.setColorFilter(getResources().getColor(R.color.red));
+            } else {
+                likeImage.setImageResource(R.drawable.favorite_outline_24px);
+                likeImage.setColorFilter(getResources().getColor(R.color.textSec));
+            }
+            
+            // Like click listener
+            likeLayout.setOnClickListener(v -> handleCommentLike(comment, position));
             
             // Reply button
             TextView replyButton = holder.itemView.findViewById(R.id.replyButton);

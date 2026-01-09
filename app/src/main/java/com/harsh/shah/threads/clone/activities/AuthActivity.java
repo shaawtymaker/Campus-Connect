@@ -142,7 +142,7 @@ public class AuthActivity extends BaseActivity {
                         mUsersDatabaseReference.child(email).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                UserModel mUser = snapshot.getValue(UserModel.class);
+                                mUser = snapshot.getValue(UserModel.class);
                                 if(mUser != null && mUser.getEmail() != null){
                                     mAuth.signInWithEmailAndPassword(mUser.getEmail(), password).addOnCompleteListener(task -> {
                                         hideProgressDialog();

@@ -88,6 +88,18 @@
             app:layout_constraintStart_toEndOf="@+id/verifiedImage"
             app:layout_constraintTop_toTopOf="@+id/verifiedImage" />
 
+
+        <ImageView
+            android:id="@+id/bookmarkImage"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="4dp"
+            android:src="@drawable/add_24px"
+            app:layout_constraintBottom_toBottomOf="@+id/time"
+            app:layout_constraintEnd_toStartOf="@+id/moreOptionsImage"
+            app:layout_constraintTop_toTopOf="@+id/time"
+            app:tint="@color/textSec" />
+
         <ImageView
             android:id="@+id/moreOptionsImage"
             android:layout_width="30dp"
